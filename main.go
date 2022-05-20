@@ -14,6 +14,8 @@ import (
 var (
 	version         string = "1.0.0"
 	minimumLogLevel int    = 0
+	maxGoroutines   int    = 10000
+	activeScans     int
 	lastScannedIp   string
 	database        *bitcask.Bitcask
 )
@@ -23,7 +25,9 @@ func log(text string, level int) {
 		return
 	}
 	logLevel := "NONE"
-	if level == 0 {
+	if level == -1 {
+		logLevel = "OTHER"
+	} else if level == 0 {
 		logLevel = "DEBUG"
 	} else if level == 1 {
 		logLevel = "INFO"
@@ -36,12 +40,13 @@ func log(text string, level int) {
 func autosave() {
 	for {
 		time.Sleep(10 * time.Second)
-		log("Saving variables...", 1)
+		log("Saving variables to database...", 0)
 		errorObject := database.Put([]byte("last-ip"), []byte(lastScannedIp))
 		database.Sync()
 		if errorObject != nil {
 			log("Unable to save variables: "+errorObject.Error(), 2)
 		}
+		log("Finished saving variables to database", 0)
 	}
 }
 
@@ -51,7 +56,8 @@ func main() {
 			"\t-h, --help\t\tDisplay a list of available arguments\n"+
 			"\t-s, --start\t\tRun OpenHeimer and start scanning IPs\n"+
 			"\t-q, --query\t\tQuery something from the database\n"+
-			"\t\tserver\t\tQuery a Minecraft server from the database",
+			"\t\tserver\t\tQuery a Minecraft server from the database\n"+
+			"\t\tplayer\t\tQuery a Minecraft player from the database",
 		version,
 	)
 	if len(os.Args) == 0 {
@@ -62,6 +68,7 @@ func main() {
 	startScanning := true
 	queryData := false
 	queryDataServer := false
+	queryDataPlayer := false
 	for index, argument := range os.Args {
 		if index > 0 {
 			if argument == "--help" || argument == "-h" {
@@ -72,6 +79,8 @@ func main() {
 				queryData = true
 			} else if argument == "server" && queryData == true {
 				queryDataServer = true
+			} else if argument == "player" && queryData == true {
+				queryDataPlayer = true
 			} else {
 				fmt.Println("Unknown argument: " + argument)
 			}
@@ -93,7 +102,7 @@ func main() {
 		startOpenHeimer()
 		return
 	}
-	if queryData == true && queryDataServer == false {
+	if queryData == true && queryDataServer == false && queryDataPlayer == false {
 		fmt.Println("You need to specify something to query!")
 		return
 	}
@@ -104,7 +113,7 @@ func startOpenHeimer() {
 	lastIpBytes, errorObject := database.Get([]byte("last-ip"))
 	if errorObject != nil {
 		log("Unable to fetch last scanned IP: "+errorObject.Error(), 0)
-		lastIpBytes = []byte("0.0.0.0")
+		lastIpBytes = []byte("192.166.0.1")
 	}
 	lastIp := string(lastIpBytes)
 	log(fmt.Sprintf("Starting IP scan from %v...", lastIp), 1)
@@ -118,24 +127,31 @@ func startOpenHeimer() {
 		serverIp := fmt.Sprintf("%v.%v.%v.%v", segmentA, segmentB, segmentC, segmentD)
 		lastScannedIp = serverIp
 
+		for activeScans >= maxGoroutines {
+			time.Sleep(500 * time.Millisecond)
+		}
+		activeScans += 1
+		go sendPing(serverIp)
+
 		segmentD += 1
 		if segmentD > 255 {
 			segmentD = 1
 			segmentC += 1
-		}
-		if segmentC > 255 {
-			segmentC = 1
-			segmentB += 1
-		}
-		if segmentB > 255 {
-			segmentB = 1
-			segmentA += 1
-		}
-		if segmentA > 255 {
-			segmentA = 0
-			segmentB = 0
-			segmentC = 0
-			segmentD = 0
+			if segmentC > 255 {
+				segmentC = 1
+				segmentB += 1
+				log("Scanning "+fmt.Sprintf("%v.%v.%v.%v", segmentA, segmentB, segmentC, segmentD)+"...", 0)
+				if segmentB > 255 {
+					segmentB = 1
+					segmentA += 1
+					if segmentA > 255 {
+						segmentA = 0
+						segmentB = 0
+						segmentC = 0
+						segmentD = 0
+					}
+				}
+			}
 		}
 	}
 }
@@ -153,11 +169,30 @@ func initializeDatabase() (bool, error) {
 }
 
 func sendPing(serverAddress string) {
-	pinger := mcpinger.New(serverAddress, 25565)
+	pinger := mcpinger.New(serverAddress, 25565, mcpinger.McPingerOption(mcpinger.WithTimeout(5*time.Second)))
 	response, errorObject := pinger.Ping()
+	activeScans -= 1
 	if errorObject != nil {
-		log(fmt.Sprintf("Unable to ping %v: %v", serverAddress, errorObject.Error()), 2)
+		log(fmt.Sprintf("Unable to ping %v: %v", serverAddress, errorObject.Error()), -1)
 		return
 	}
-	log(response.Version.Name, 1)
+	log(fmt.Sprintf(
+		"%v running Minecraft %v (%v/%v): %v",
+		serverAddress,
+		response.Version.Name,
+		response.Players.Online,
+		response.Players.Max,
+		response.Players.Sample,
+	), 1)
+	database.Put([]byte(serverAddress), []byte(fmt.Sprintf(
+		"time:%v,version:%v,protocol:%v,motd:%v,players_online:%v,players_max:%v,sample:%v",
+		time.Now().Unix(),
+		response.Version.Name,
+		response.Version.Protocol,
+		response.Description.Text,
+		response.Players.Online,
+		response.Players.Max,
+		response.Players.Sample,
+	)))
+	database.Sync()
 }
