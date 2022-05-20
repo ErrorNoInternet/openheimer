@@ -214,9 +214,9 @@ func main() {
 			}
 		} else if queryDataPlayer && query != "" {
 			found := false
-			for key := range database.Keys() {
-				if string(key) != "last-ip" {
-					serverData, _ := database.Get([]byte(key))
+			for serverKey := range database.Keys() {
+				if string(serverKey) != "last-ip" {
+					serverData, _ := database.Get([]byte(serverKey))
 					segments := strings.Split(string(serverData), "\n")
 					for _, segment := range segments {
 						if strings.HasPrefix(segment, "players_sample:") {
@@ -230,6 +230,7 @@ func main() {
 										key := strings.Split(segment, ":")[0]
 										value := strings.Split(segment, ":")[1]
 										timestamp, _ := strconv.Atoi(value)
+										fmt.Println("Server IP: " + string(serverKey))
 										if key == "time" {
 											fmt.Println("Time: " + time.Unix(int64(timestamp), 0).Format("2006-01-02 15:04:05") + " (" + value + ")")
 										}
