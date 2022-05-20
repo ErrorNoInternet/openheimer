@@ -150,7 +150,6 @@ func main() {
 		return
 	}
 	if startScanning || queryData {
-		log(fmt.Sprintf("Max Goroutines: %v, Connect Timeout: %v second(s)", maxGoroutines, maxTimeout), 1)
 		log("Initializing database...", 1)
 		success, errorObject := initializeDatabase()
 		if !success {
@@ -159,12 +158,13 @@ func main() {
 		}
 	}
 	if startScanning {
+		log(fmt.Sprintf("Max Goroutines: %v, Connect Timeout: %v second(s)", maxGoroutines, maxTimeout), 1)
 		log("Launching autosave goroutine...", 1)
 		go autosave()
 		startOpenHeimer()
 		return
 	}
-	if queryData == true {
+	if queryData {
 		if queryDataServer == false && queryDataPlayer == false {
 			fmt.Println("You need to specify something to query!")
 			return
