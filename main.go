@@ -102,8 +102,10 @@ func main() {
 			} else {
 				if queryDataServer {
 					query = argument
+					queryDataServer = false
 				} else if queryDataPlayer {
 					query = argument
+					queryDataPlayer = false
 				} else if startGoroutineCount {
 					var errorObject error
 					maxGoroutines, errorObject = strconv.Atoi(argument)
@@ -111,6 +113,7 @@ func main() {
 						fmt.Println(fmt.Sprintf("Unable to parse \"%v\" as an integer: %v", maxGoroutines, errorObject.Error()))
 						return
 					}
+					startGoroutineCount = false
 				} else if startTimeout {
 					var errorObject error
 					maxTimeout, errorObject = strconv.Atoi(argument)
@@ -118,6 +121,7 @@ func main() {
 						fmt.Println(fmt.Sprintf("Unable to parse \"%v\" as an integer: %v", maxGoroutines, errorObject.Error()))
 						return
 					}
+					startTimeout = false
 				} else if startCustomIp {
 					invalid := false
 					if strings.Count(argument, ".") != 3 {
@@ -139,6 +143,7 @@ func main() {
 						return
 					}
 					startIpAddress = argument
+					startCustomIp = false
 				} else {
 					fmt.Println("Unknown argument: " + argument)
 				}
