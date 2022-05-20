@@ -119,7 +119,7 @@ func main() {
 			fmt.Println("List of found Minecraft servers:")
 			for key := range database.Keys() {
 				if string(key) != "last-ip" {
-					fmt.Println(key)
+					fmt.Println(string(key))
 				}
 			}
 		} else if queryDataServer && query != "" {
@@ -128,7 +128,86 @@ func main() {
 				fmt.Println("Unable to query server: " + errorObject.Error())
 				return
 			}
-			fmt.Println(serverData)
+			fmt.Println(string(serverData))
+		} else if queryDataPlayer && query == "" {
+			fmt.Println("List of found Minecraft players:")
+			playerList := []string{}
+			for key := range database.Keys() {
+				if string(key) != "last-ip" {
+					serverData, _ := database.Get([]byte(key))
+					segments := strings.Split(string(serverData), "\n")
+					for _, segment := range segments {
+						if strings.HasPrefix(segment, "players_sample:") {
+							players := strings.Split(strings.Split(segment, ":")[1], "|")
+							for _, player := range players {
+								exists := false
+								for _, existingPlayer := range playerList {
+									if player == existingPlayer {
+										exists = true
+									}
+								}
+								if !exists {
+									playerList = append(playerList, player)
+								}
+							}
+						}
+					}
+				}
+			}
+			for _, player := range playerList {
+				if player != "" {
+					fmt.Println(player)
+				}
+			}
+		} else if queryDataPlayer && query != "" {
+			found := false
+			for key := range database.Keys() {
+				if string(key) != "last-ip" {
+					serverData, _ := database.Get([]byte(key))
+					segments := strings.Split(string(serverData), "\n")
+					for _, segment := range segments {
+						if strings.HasPrefix(segment, "players_sample:") {
+							players := strings.Split(strings.Split(segment, ":")[1], "|")
+							for _, player := range players {
+								if strings.HasPrefix(player, query+"-") {
+									fmt.Println("Player: " + query)
+									found = true
+									segments := strings.Split(string(serverData), "\n")
+									for _, segment := range segments {
+										key := strings.Split(segment, ":")[0]
+										value := strings.Split(segment, ":")[1]
+										timestamp, _ := strconv.Atoi(value)
+										if key == "time" {
+											fmt.Println("Time: " + time.Unix(int64(timestamp), 0).Format("2006-01-02 15:04:05") + " (" + value + ")")
+										}
+										if key == "version" {
+											fmt.Println("Server Version: " + value)
+										}
+										if key == "protocol" {
+											fmt.Println("Server Protocol: " + value)
+										}
+										if key == "motd" {
+											fmt.Println("MOTD: " + value)
+										}
+										if key == "players_online" {
+											fmt.Println("Online Player Count: " + value)
+										}
+										if key == "players_max" {
+											fmt.Println("Maximum Player Count: " + value)
+										}
+										if key == "players_sample" {
+											fmt.Println("Players: " + value)
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			if !found {
+				fmt.Println("Unable to query player: player not found")
+			}
 		}
 	}
 }
@@ -138,7 +217,7 @@ func startOpenHeimer() {
 	lastIpBytes, errorObject := database.Get([]byte("last-ip"))
 	if errorObject != nil {
 		log("Unable to fetch last scanned IP: "+errorObject.Error(), 0)
-		lastIpBytes = []byte("1.0.0.0")
+		lastIpBytes = []byte("1.14.0.0")
 	}
 	lastIp := string(lastIpBytes)
 	log(fmt.Sprintf("Starting IP scan from %v...", lastIp), 1)
@@ -201,23 +280,29 @@ func sendPing(serverAddress string) {
 		log(fmt.Sprintf("Unable to ping %v: %v", serverAddress, errorObject.Error()), -1)
 		return
 	}
+	players := []string{}
+	for _, player := range response.Players.Sample {
+		if strings.TrimSpace(player.Name) != "" && !strings.HasPrefix(strings.TrimSpace(player.Name), "§") {
+			players = append(players, player.Name+"-"+player.ID)
+		}
+	}
 	log(fmt.Sprintf(
 		"%v running Minecraft %v (%v/%v): %v",
 		serverAddress,
 		response.Version.Name,
 		response.Players.Online,
 		response.Players.Max,
-		response.Players.Sample,
+		strings.Join(players, ", "),
 	), 1)
 	database.Put([]byte(serverAddress), []byte(fmt.Sprintf(
-		"time:%v,version:%v,protocol:%v,motd:%v,players_online:%v,players_max:%v,sample:%v",
+		"time:%v\nversion:%v\nprotocol:%v\nmotd:%v\nplayers_online:%v\nplayers_max:%v\nplayers_sample:%v",
 		time.Now().Unix(),
 		response.Version.Name,
 		response.Version.Protocol,
 		response.Description.Text,
 		response.Players.Online,
 		response.Players.Max,
-		response.Players.Sample,
+		strings.Join(players, "|"),
 	)))
 	database.Sync()
 }
