@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	version         string = "1.0.0"
+	version         string = "0.0.1"
 	minimumLogLevel int    = 0
 	maxGoroutines   int
 	maxTimeout      int
@@ -306,7 +306,7 @@ func sendPing(serverAddress string) {
 	}
 	players := []string{}
 	for _, player := range response.Players.Sample {
-		if strings.TrimSpace(player.Name) != "" && !strings.HasPrefix(strings.TrimSpace(player.Name), "§") {
+		if strings.TrimSpace(player.Name) != "" && !strings.Contains(player.Name, "§") {
 			players = append(players, player.Name+"-"+player.ID)
 		}
 	}
