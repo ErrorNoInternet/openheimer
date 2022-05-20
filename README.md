@@ -13,6 +13,7 @@ OpenHeimer v0.0.1
 		--goroutines		Maximum number of goroutines (10000)
 		--timeout		Maximum number of seconds to wait (5 seconds)
 		--ip-address		Specify which IP address to start scanning from
+	-v, --verbose		Display everthing that's currently happening
 	-q, --query		Query something from the database
 		--server		Query a Minecraft server from the database
 		--player		Query a Minecraft player from the database
