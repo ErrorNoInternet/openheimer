@@ -60,15 +60,16 @@ func main() {
 			"\t\tplayer\t\tQuery a Minecraft player from the database",
 		version,
 	)
-	if len(os.Args) == 0 {
+	if len(os.Args) == 1 {
 		fmt.Println(helpPage)
 		return
 	}
 	showHelp := false
-	startScanning := true
+	startScanning := false
 	queryData := false
 	queryDataServer := false
 	queryDataPlayer := false
+	query := ""
 	for index, argument := range os.Args {
 		if index > 0 {
 			if argument == "--help" || argument == "-h" {
@@ -82,7 +83,13 @@ func main() {
 			} else if argument == "player" && queryData == true {
 				queryDataPlayer = true
 			} else {
-				fmt.Println("Unknown argument: " + argument)
+				if queryDataServer {
+					query = argument
+				} else if queryDataPlayer {
+					query = argument
+				} else {
+					fmt.Println("Unknown argument: " + argument)
+				}
 			}
 		}
 	}
@@ -90,21 +97,39 @@ func main() {
 		fmt.Println(helpPage)
 		return
 	}
-	if startScanning {
+	if startScanning || queryData {
 		log("Initializing database...", 1)
 		success, errorObject := initializeDatabase()
 		if !success {
 			log("Unable to initialize database: "+errorObject.Error(), 2)
 			return
 		}
+	}
+	if startScanning {
 		log("Launching autosave goroutine...", 1)
 		go autosave()
 		startOpenHeimer()
 		return
 	}
-	if queryData == true && queryDataServer == false && queryDataPlayer == false {
-		fmt.Println("You need to specify something to query!")
-		return
+	if queryData == true {
+		if queryDataServer == false && queryDataPlayer == false {
+			fmt.Println("You need to specify something to query!")
+			return
+		} else if queryDataServer && query == "" {
+			fmt.Println("List of found Minecraft servers:")
+			for key := range database.Keys() {
+				if string(key) != "last-ip" {
+					fmt.Println(key)
+				}
+			}
+		} else if queryDataServer && query != "" {
+			serverData, errorObject := database.Get([]byte(query))
+			if errorObject != nil {
+				fmt.Println("Unable to query server: " + errorObject.Error())
+				return
+			}
+			fmt.Println(serverData)
+		}
 	}
 }
 
@@ -113,7 +138,7 @@ func startOpenHeimer() {
 	lastIpBytes, errorObject := database.Get([]byte("last-ip"))
 	if errorObject != nil {
 		log("Unable to fetch last scanned IP: "+errorObject.Error(), 0)
-		lastIpBytes = []byte("192.166.0.1")
+		lastIpBytes = []byte("1.0.0.0")
 	}
 	lastIp := string(lastIpBytes)
 	log(fmt.Sprintf("Starting IP scan from %v...", lastIp), 1)
