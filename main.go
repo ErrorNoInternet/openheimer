@@ -14,7 +14,8 @@ import (
 var (
 	version         string = "1.0.0"
 	minimumLogLevel int    = 0
-	maxGoroutines   int    = 10000
+	maxGoroutines   int
+	maxTimeout      int
 	activeScans     int
 	lastScannedIp   string
 	database        *bitcask.Bitcask
@@ -55,9 +56,11 @@ func main() {
 		"OpenHeimer v%v\n\n"+
 			"\t-h, --help\t\tDisplay a list of available arguments\n"+
 			"\t-s, --start\t\tRun OpenHeimer and start scanning IPs\n"+
+			"\t\t--goroutines\t\tMaximum number of goroutines (10000)\n"+
+			"\t\t--timeout\t\tMaximum number of seconds to wait (5 seconds)\n"+
 			"\t-q, --query\t\tQuery something from the database\n"+
-			"\t\tserver\t\tQuery a Minecraft server from the database\n"+
-			"\t\tplayer\t\tQuery a Minecraft player from the database",
+			"\t\t--server\t\tQuery a Minecraft server from the database\n"+
+			"\t\t--player\t\tQuery a Minecraft player from the database",
 		version,
 	)
 	if len(os.Args) == 1 {
@@ -66,10 +69,14 @@ func main() {
 	}
 	showHelp := false
 	startScanning := false
+	startGoroutineCount := false
+	startTimeout := false
 	queryData := false
 	queryDataServer := false
 	queryDataPlayer := false
 	query := ""
+	maxGoroutines = 10000
+	maxTimeout = 5
 	for index, argument := range os.Args {
 		if index > 0 {
 			if argument == "--help" || argument == "-h" {
@@ -78,15 +85,33 @@ func main() {
 				startScanning = true
 			} else if argument == "--query" || argument == "-q" {
 				queryData = true
-			} else if argument == "server" && queryData == true {
+			} else if argument == "--server" && queryData == true {
 				queryDataServer = true
-			} else if argument == "player" && queryData == true {
+			} else if argument == "--player" && queryData == true {
 				queryDataPlayer = true
+			} else if argument == "--goroutines" && startScanning == true {
+				startGoroutineCount = true
+			} else if argument == "--timeout" && startScanning == true {
+				startTimeout = true
 			} else {
 				if queryDataServer {
 					query = argument
 				} else if queryDataPlayer {
 					query = argument
+				} else if startGoroutineCount {
+					var errorObject error
+					maxGoroutines, errorObject = strconv.Atoi(argument)
+					if errorObject != nil {
+						fmt.Println(fmt.Sprintf("Unable to parse \"%v\" as an integer: %v", maxGoroutines, errorObject.Error()))
+						return
+					}
+				} else if startTimeout {
+					var errorObject error
+					maxTimeout, errorObject = strconv.Atoi(argument)
+					if errorObject != nil {
+						fmt.Println(fmt.Sprintf("Unable to parse \"%v\" as an integer: %v", maxGoroutines, errorObject.Error()))
+						return
+					}
 				} else {
 					fmt.Println("Unknown argument: " + argument)
 				}
@@ -98,6 +123,7 @@ func main() {
 		return
 	}
 	if startScanning || queryData {
+		log(fmt.Sprintf("Max Goroutines: %v, Connect Timeout: %v second(s)", maxGoroutines, maxTimeout), 1)
 		log("Initializing database...", 1)
 		success, errorObject := initializeDatabase()
 		if !success {
@@ -217,7 +243,7 @@ func startOpenHeimer() {
 	lastIpBytes, errorObject := database.Get([]byte("last-ip"))
 	if errorObject != nil {
 		log("Unable to fetch last scanned IP: "+errorObject.Error(), 0)
-		lastIpBytes = []byte("1.14.0.0")
+		lastIpBytes = []byte("1.0.0.0")
 	}
 	lastIp := string(lastIpBytes)
 	log(fmt.Sprintf("Starting IP scan from %v...", lastIp), 1)
@@ -273,7 +299,7 @@ func initializeDatabase() (bool, error) {
 }
 
 func sendPing(serverAddress string) {
-	pinger := mcpinger.New(serverAddress, 25565, mcpinger.McPingerOption(mcpinger.WithTimeout(5*time.Second)))
+	pinger := mcpinger.New(serverAddress, 25565, mcpinger.McPingerOption(mcpinger.WithTimeout(time.Duration(maxTimeout)*time.Second)))
 	response, errorObject := pinger.Ping()
 	activeScans -= 1
 	if errorObject != nil {
