@@ -250,7 +250,7 @@ func main() {
 											fmt.Println("Maximum Player Count: " + value)
 										}
 										if key == "players_sample" {
-											fmt.Println("Players: " + value)
+											fmt.Println("Players: " + strings.Replace(value, "|", ", ", -1))
 										}
 									}
 								}
