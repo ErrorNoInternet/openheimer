@@ -60,6 +60,7 @@ func main() {
 			"\t\t--goroutines\t\tMaximum number of goroutines (10000)\n"+
 			"\t\t--timeout\t\tMaximum number of seconds to wait (5 seconds)\n"+
 			"\t\t--ip-address\t\tSpecify which IP address to start scanning from\n"+
+			"\t-v, --verbose\t\tDisplay everthing that's currently happening\n"+
 			"\t-q, --query\t\tQuery something from the database\n"+
 			"\t\t--server\t\tQuery a Minecraft server from the database\n"+
 			"\t\t--player\t\tQuery a Minecraft player from the database",
@@ -87,6 +88,8 @@ func main() {
 				showHelp = true
 			} else if argument == "--start" || argument == "-s" {
 				startScanning = true
+			} else if argument == "--verbose" || argument == "-v" {
+				minimumLogLevel = -1
 			} else if argument == "--query" || argument == "-q" {
 				queryData = true
 			} else if argument == "--server" && queryData == true {
