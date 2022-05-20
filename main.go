@@ -96,7 +96,7 @@ func main() {
 				queryData = true
 			} else if argument == "--server" && queryData == true {
 				queryDataServer = true
-				queriedDataPlayer = true
+				queriedDataServer = true
 			} else if argument == "--player" && queryData == true {
 				queryDataPlayer = true
 				queriedDataPlayer = true
