@@ -299,7 +299,7 @@ func startOpenHeimer() {
 			if segmentC > 255 {
 				segmentC = 1
 				segmentB += 1
-				log("Scanning "+fmt.Sprintf("%v.%v.%v.%v", segmentA, segmentB, segmentC, segmentD)+"...", 1)
+				log("Scanning "+fmt.Sprintf("%v.%v.*.*", segmentA, segmentB)+"...", 1)
 				if segmentB > 255 {
 					segmentB = 1
 					segmentA += 1
