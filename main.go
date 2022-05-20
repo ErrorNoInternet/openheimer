@@ -163,7 +163,7 @@ func main() {
 		}
 	}
 	if startScanning {
-		log(fmt.Sprintf("Max Goroutines: %v, Connect Timeout: %v second(s)", maxGoroutines, maxTimeout), 1)
+		log(fmt.Sprintf("Max Goroutines: %v, Connection Timeout: %v second(s)", maxGoroutines, maxTimeout), 1)
 		log("Launching autosave goroutine...", 1)
 		go autosave()
 		startOpenHeimer()
@@ -300,14 +300,14 @@ func startOpenHeimer() {
 
 		segmentD += 1
 		if segmentD > 255 {
-			segmentD = 1
+			segmentD = 0
 			segmentC += 1
 			if segmentC > 255 {
-				segmentC = 1
+				segmentC = 0
 				segmentB += 1
 				log("Scanning "+fmt.Sprintf("%v.%v.*.*", segmentA, segmentB)+"...", 1)
 				if segmentB > 255 {
-					segmentB = 1
+					segmentB = 0
 					segmentA += 1
 					if segmentA > 255 {
 						segmentA = 0
