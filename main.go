@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -16,7 +17,6 @@ var (
 	minimumLogLevel int    = 0
 	maxGoroutines   int
 	maxTimeout      int
-	activeScans     int
 	lastScannedIp   string
 	database        *bitcask.Bitcask
 )
@@ -257,10 +257,9 @@ func startOpenHeimer() {
 		serverIp := fmt.Sprintf("%v.%v.%v.%v", segmentA, segmentB, segmentC, segmentD)
 		lastScannedIp = serverIp
 
-		for activeScans >= maxGoroutines {
+		for runtime.NumGoroutine() >= maxGoroutines {
 			time.Sleep(500 * time.Millisecond)
 		}
-		activeScans += 1
 		go sendPing(serverIp)
 
 		segmentD += 1
@@ -301,7 +300,6 @@ func initializeDatabase() (bool, error) {
 func sendPing(serverAddress string) {
 	pinger := mcpinger.New(serverAddress, 25565, mcpinger.McPingerOption(mcpinger.WithTimeout(time.Duration(maxTimeout)*time.Second)))
 	response, errorObject := pinger.Ping()
-	activeScans -= 1
 	if errorObject != nil {
 		log(fmt.Sprintf("Unable to ping %v: %v", serverAddress, errorObject.Error()), -1)
 		return
