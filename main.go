@@ -17,6 +17,7 @@ var (
 	minimumLogLevel int    = 0
 	maxGoroutines   int
 	maxTimeout      int
+	startIpAddress  string
 	lastScannedIp   string
 	database        *bitcask.Bitcask
 )
@@ -58,6 +59,7 @@ func main() {
 			"\t-s, --start\t\tRun OpenHeimer and start scanning IPs\n"+
 			"\t\t--goroutines\t\tMaximum number of goroutines (10000)\n"+
 			"\t\t--timeout\t\tMaximum number of seconds to wait (5 seconds)\n"+
+			"\t\t--ip-address\t\tSpecify which IP address to start scanning from\n"+
 			"\t-q, --query\t\tQuery something from the database\n"+
 			"\t\t--server\t\tQuery a Minecraft server from the database\n"+
 			"\t\t--player\t\tQuery a Minecraft player from the database",
@@ -71,12 +73,14 @@ func main() {
 	startScanning := false
 	startGoroutineCount := false
 	startTimeout := false
+	startCustomIp := false
 	queryData := false
 	queryDataServer := false
 	queryDataPlayer := false
 	query := ""
 	maxGoroutines = 10000
 	maxTimeout = 5
+	startIpAddress = ""
 	for index, argument := range os.Args {
 		if index > 0 {
 			if argument == "--help" || argument == "-h" {
@@ -93,6 +97,8 @@ func main() {
 				startGoroutineCount = true
 			} else if argument == "--timeout" && startScanning == true {
 				startTimeout = true
+			} else if argument == "--ip-address" && startScanning == true {
+				startCustomIp = true
 			} else {
 				if queryDataServer {
 					query = argument
@@ -112,6 +118,27 @@ func main() {
 						fmt.Println(fmt.Sprintf("Unable to parse \"%v\" as an integer: %v", maxGoroutines, errorObject.Error()))
 						return
 					}
+				} else if startCustomIp {
+					invalid := false
+					if strings.Count(argument, ".") != 3 {
+						invalid = true
+					}
+					segments := strings.Split(argument, ".")
+					for _, segment := range segments {
+						number, errorObject := strconv.Atoi(segment)
+						if errorObject != nil {
+							invalid = true
+						} else {
+							if number > 255 {
+								invalid = true
+							}
+						}
+					}
+					if invalid {
+						fmt.Println(fmt.Sprintf("The IP you specified (%v) is invalid!", argument))
+						return
+					}
+					startIpAddress = argument
 				} else {
 					fmt.Println("Unknown argument: " + argument)
 				}
@@ -246,6 +273,9 @@ func startOpenHeimer() {
 		lastIpBytes = []byte("1.0.0.0")
 	}
 	lastIp := string(lastIpBytes)
+	if startIpAddress != "" {
+		lastIp = startIpAddress
+	}
 	log(fmt.Sprintf("Starting IP scan from %v...", lastIp), 1)
 	segments := strings.Split(lastIp, ".")
 	segmentA, _ := strconv.Atoi(segments[0])
@@ -269,7 +299,7 @@ func startOpenHeimer() {
 			if segmentC > 255 {
 				segmentC = 1
 				segmentB += 1
-				log("Scanning "+fmt.Sprintf("%v.%v.%v.%v", segmentA, segmentB, segmentC, segmentD)+"...", 0)
+				log("Scanning "+fmt.Sprintf("%v.%v.%v.%v", segmentA, segmentB, segmentC, segmentD)+"...", 1)
 				if segmentB > 255 {
 					segmentB = 1
 					segmentA += 1
