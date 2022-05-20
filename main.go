@@ -224,13 +224,13 @@ func main() {
 							for _, player := range players {
 								if strings.HasPrefix(player, query+"-") {
 									fmt.Println("Player: " + query)
+									fmt.Println("Server IP: " + string(serverKey))
 									found = true
 									segments := strings.Split(string(serverData), "\n")
 									for _, segment := range segments {
 										key := strings.Split(segment, ":")[0]
 										value := strings.Split(segment, ":")[1]
 										timestamp, _ := strconv.Atoi(value)
-										fmt.Println("Server IP: " + string(serverKey))
 										if key == "time" {
 											fmt.Println("Time: " + time.Unix(int64(timestamp), 0).Format("2006-01-02 15:04:05") + " (" + value + ")")
 										}
