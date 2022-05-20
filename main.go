@@ -78,6 +78,8 @@ func main() {
 	queryData := false
 	queryDataServer := false
 	queryDataPlayer := false
+	queriedDataServer := false
+	queriedDataPlayer := false
 	query := ""
 	maxGoroutines = 10000
 	maxTimeout = 5
@@ -94,8 +96,10 @@ func main() {
 				queryData = true
 			} else if argument == "--server" && queryData == true {
 				queryDataServer = true
+				queriedDataPlayer = true
 			} else if argument == "--player" && queryData == true {
 				queryDataPlayer = true
+				queriedDataPlayer = true
 			} else if argument == "--goroutines" && startScanning == true {
 				startGoroutineCount = true
 			} else if argument == "--timeout" && startScanning == true {
@@ -173,24 +177,24 @@ func main() {
 		return
 	}
 	if queryData {
-		if queryDataServer == false && queryDataPlayer == false {
+		if queriedDataServer == false && queriedDataPlayer == false {
 			fmt.Println("You need to specify something to query!")
 			return
-		} else if queryDataServer && query == "" {
+		} else if queriedDataServer && query == "" {
 			fmt.Println("List of found Minecraft servers:")
 			for key := range database.Keys() {
 				if string(key) != "last-ip" {
 					fmt.Println(string(key))
 				}
 			}
-		} else if queryDataServer && query != "" {
+		} else if queriedDataServer && query != "" {
 			serverData, errorObject := database.Get([]byte(query))
 			if errorObject != nil {
 				fmt.Println("Unable to query server: " + errorObject.Error())
 				return
 			}
 			fmt.Println(string(serverData))
-		} else if queryDataPlayer && query == "" {
+		} else if queriedDataPlayer && query == "" {
 			fmt.Println("List of found Minecraft players:")
 			playerList := []string{}
 			for key := range database.Keys() {
@@ -220,7 +224,7 @@ func main() {
 					fmt.Println(player)
 				}
 			}
-		} else if queryDataPlayer && query != "" {
+		} else if queriedDataPlayer && query != "" {
 			found := false
 			for serverKey := range database.Keys() {
 				if string(serverKey) != "last-ip" {
