@@ -40,7 +40,7 @@ func log(text string, level int) {
 
 func autosave() {
 	for {
-		time.Sleep(10 * time.Second)
+		time.Sleep(20 * time.Second)
 		log("Saving variables to database...", 0)
 		errorObject := database.Put([]byte("last-ip"), []byte(lastScannedIp))
 		database.Sync()
@@ -328,5 +328,4 @@ func sendPing(serverAddress string) {
 		response.Players.Max,
 		strings.Join(players, "|"),
 	)))
-	database.Sync()
 }
