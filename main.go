@@ -193,7 +193,33 @@ func main() {
 				fmt.Println("Unable to query server: " + errorObject.Error())
 				return
 			}
-			fmt.Println(string(serverData))
+			segments := strings.Split(string(serverData), "\n")
+			for _, segment := range segments {
+				key := strings.Split(segment, ":")[0]
+				value := strings.Split(segment, ":")[1]
+				timestamp, _ := strconv.Atoi(value)
+				if key == "time" {
+					fmt.Println("Time: " + time.Unix(int64(timestamp), 0).Format("2006-01-02 15:04:05") + " (" + value + ")")
+				}
+				if key == "version" {
+					fmt.Println("Server Version: " + value)
+				}
+				if key == "protocol" {
+					fmt.Println("Server Protocol: " + value)
+				}
+				if key == "motd" {
+					fmt.Println("MOTD: " + value)
+				}
+				if key == "players_online" {
+					fmt.Println("Online Player Count: " + value)
+				}
+				if key == "players_max" {
+					fmt.Println("Maximum Player Count: " + value)
+				}
+				if key == "players_sample" {
+					fmt.Println("Players: " + strings.Replace(value, "|", ", ", -1))
+				}
+			}
 		} else if queriedDataPlayer && query == "" {
 			fmt.Println("List of found Minecraft players:")
 			playerList := []string{}
@@ -353,6 +379,29 @@ func sendPing(serverAddress string) {
 			players = append(players, player.Name+"-"+player.ID)
 		}
 	}
+	playerList := ""
+	currentData, errorObject := database.Get([]byte(serverAddress))
+	if errorObject == nil {
+		segments := strings.Split(string(currentData), "\n")
+		for _, segment := range segments {
+			if strings.HasPrefix(segment, "players_sample:") {
+				existingPlayers := strings.Split(strings.Split(segment, ":")[1], "|")
+				fmt.Println(existingPlayers)
+				for _, existingPlayer := range existingPlayers {
+					exists := false
+					for _, newPlayer := range players {
+						if newPlayer == existingPlayer {
+							exists = true
+						}
+					}
+					if !exists {
+						playerList += existingPlayer + "|"
+						fmt.Println(existingPlayer)
+					}
+				}
+			}
+		}
+	}
 	log(fmt.Sprintf(
 		"%v running Minecraft %v (%v/%v): %v",
 		serverAddress,
@@ -369,6 +418,6 @@ func sendPing(serverAddress string) {
 		response.Description.Text,
 		response.Players.Online,
 		response.Players.Max,
-		strings.Join(players, "|"),
+		playerList+strings.Join(players, "|"),
 	)))
 }
