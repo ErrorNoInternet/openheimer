@@ -16,6 +16,7 @@ var (
 	maxGoroutines   int
 	maxTimeout      int
 	startIpAddress  string
+	ipAddressFile   string
 	lastScannedIp   string
 	database        *bitcask.Bitcask
 )
@@ -55,6 +56,7 @@ func main() {
 		"OpenHeimer v%v\n\n"+
 			"\t-h, --help\t\tDisplay a list of available arguments\n"+
 			"\t-s, --start\t\tRun OpenHeimer and start scanning IPs\n"+
+			"\t\t--file\t\tScan all the IP addresses specified in the file\n"+
 			"\t\t--goroutines\t\tMaximum number of goroutines (10000)\n"+
 			"\t\t--timeout\t\tMaximum number of seconds to wait (5 seconds)\n"+
 			"\t\t--ip-address\t\tSpecify which IP address to start scanning from\n"+
@@ -73,6 +75,7 @@ func main() {
 	startGoroutineCount := false
 	startTimeout := false
 	startCustomIp := false
+	startCustomFile := false
 	queryData := false
 	queryDataServer := false
 	queryDataPlayer := false
@@ -98,6 +101,8 @@ func main() {
 			} else if argument == "--player" && queryData == true {
 				queryDataPlayer = true
 				queriedDataPlayer = true
+			} else if argument == "--file" && startScanning == true {
+				startCustomFile = true
 			} else if argument == "--goroutines" && startScanning == true {
 				startGoroutineCount = true
 			} else if argument == "--timeout" && startScanning == true {
@@ -128,27 +133,20 @@ func main() {
 					}
 					startTimeout = false
 				} else if startCustomIp {
-					invalid := false
-					if strings.Count(argument, ".") != 3 {
-						invalid = true
-					}
-					segments := strings.Split(argument, ".")
-					for _, segment := range segments {
-						number, errorObject := strconv.Atoi(segment)
-						if errorObject != nil {
-							invalid = true
-						} else {
-							if number > 255 {
-								invalid = true
-							}
-						}
-					}
-					if invalid {
+					if verifyIp(argument) {
 						fmt.Println(fmt.Sprintf("The IP you specified (%v) is invalid!", argument))
 						return
 					}
 					startIpAddress = argument
 					startCustomIp = false
+				} else if startCustomFile {
+					_, errorObject := os.Stat(argument)
+					if errorObject != nil {
+						fmt.Println(fmt.Sprintf("Unable to access %v: %v", argument, errorObject.Error()))
+						return
+					}
+					ipAddressFile = argument
+					startCustomFile = false
 				} else {
 					fmt.Println("Unknown argument: " + argument)
 				}
@@ -300,6 +298,24 @@ func main() {
 			}
 		}
 	}
+}
+
+func verifyIp(ip string) bool {
+	if strings.Count(ip, ".") != 3 {
+		return true
+	}
+	segments := strings.Split(ip, ".")
+	for _, segment := range segments {
+		number, errorObject := strconv.Atoi(segment)
+		if errorObject != nil {
+			return true
+		} else {
+			if number > 255 {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func initializeDatabase() (bool, error) {

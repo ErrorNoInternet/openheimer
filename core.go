@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"runtime"
 	"strconv"
 	"strings"
@@ -65,48 +66,77 @@ func sendPing(serverAddress string) {
 }
 
 func startOpenHeimer() {
-	log("Fetching last scanned IP from database...", 0)
-	lastIpBytes, errorObject := database.Get([]byte("last-ip"))
-	if errorObject != nil {
-		log("Unable to fetch last scanned IP: "+errorObject.Error(), 0)
-		lastIpBytes = []byte("1.0.0.0")
-	}
-	lastIp := string(lastIpBytes)
-	if startIpAddress != "" {
-		lastIp = startIpAddress
-	}
-	log(fmt.Sprintf("Starting IP scan from %v...", lastIp), 1)
-	segments := strings.Split(lastIp, ".")
-	segmentA, _ := strconv.Atoi(segments[0])
-	segmentB, _ := strconv.Atoi(segments[1])
-	segmentC, _ := strconv.Atoi(segments[2])
-	segmentD, _ := strconv.Atoi(segments[3])
-
-	for {
-		serverIp := fmt.Sprintf("%v.%v.%v.%v", segmentA, segmentB, segmentC, segmentD)
-		lastScannedIp = serverIp
-
-		for runtime.NumGoroutine() >= maxGoroutines {
-			time.Sleep(500 * time.Millisecond)
+	if ipAddressFile != "" {
+		log("Loading IPs from file: "+ipAddressFile, 1)
+		fileContent, errorObject := ioutil.ReadFile(ipAddressFile)
+		if errorObject != nil {
+			fmt.Println("Unable to read file: " + errorObject.Error())
+			return
 		}
-		go sendPing(serverIp)
+		lines := strings.Split(string(fileContent), "\n")
+		for index, line := range lines {
+			if strings.TrimSpace(line) != "" {
+				if verifyIp(line) {
+					fmt.Println(fmt.Sprintf("Invalid IP address: \"%v\" (line %v)", line, index))
+					return
+				}
+			}
+		}
+		log(fmt.Sprintf("Loaded %v IP addresses from %v", len(lines), ipAddressFile), 1)
+		for _, line := range lines {
+			if strings.TrimSpace(line) != "" {
+				for runtime.NumGoroutine() >= maxGoroutines {
+					time.Sleep(200 * time.Millisecond)
+				}
+				go sendPing(line)
+			}
+		}
+		for runtime.NumGoroutine() > 2 {
+			time.Sleep(1 * time.Second)
+		}
+	} else {
+		log("Fetching last scanned IP from database...", 0)
+		lastIpBytes, errorObject := database.Get([]byte("last-ip"))
+		if errorObject != nil {
+			log("Unable to fetch last scanned IP: "+errorObject.Error(), 0)
+			lastIpBytes = []byte("1.0.0.0")
+		}
+		lastIp := string(lastIpBytes)
+		if startIpAddress != "" {
+			lastIp = startIpAddress
+		}
+		log(fmt.Sprintf("Starting IP scan from %v...", lastIp), 1)
+		segments := strings.Split(lastIp, ".")
+		segmentA, _ := strconv.Atoi(segments[0])
+		segmentB, _ := strconv.Atoi(segments[1])
+		segmentC, _ := strconv.Atoi(segments[2])
+		segmentD, _ := strconv.Atoi(segments[3])
+		for {
+			serverIp := fmt.Sprintf("%v.%v.%v.%v", segmentA, segmentB, segmentC, segmentD)
+			lastScannedIp = serverIp
 
-		segmentD += 1
-		if segmentD > 255 {
-			segmentD = 0
-			segmentC += 1
-			if segmentC > 255 {
-				segmentC = 0
-				segmentB += 1
-				log("Scanning "+fmt.Sprintf("%v.%v.*.*", segmentA, segmentB)+"...", 1)
-				if segmentB > 255 {
-					segmentB = 0
-					segmentA += 1
-					if segmentA > 255 {
-						segmentA = 0
+			for runtime.NumGoroutine() >= maxGoroutines {
+				time.Sleep(500 * time.Millisecond)
+			}
+			go sendPing(serverIp)
+
+			segmentD += 1
+			if segmentD > 255 {
+				segmentD = 0
+				segmentC += 1
+				if segmentC > 255 {
+					segmentC = 0
+					segmentB += 1
+					log("Scanning "+fmt.Sprintf("%v.%v.*.*", segmentA, segmentB)+"...", 1)
+					if segmentB > 255 {
 						segmentB = 0
-						segmentC = 0
-						segmentD = 0
+						segmentA += 1
+						if segmentA > 255 {
+							segmentA = 0
+							segmentB = 0
+							segmentC = 0
+							segmentD = 0
+						}
 					}
 				}
 			}
