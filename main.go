@@ -386,7 +386,6 @@ func sendPing(serverAddress string) {
 		for _, segment := range segments {
 			if strings.HasPrefix(segment, "players_sample:") {
 				existingPlayers := strings.Split(strings.Split(segment, ":")[1], "|")
-				fmt.Println(existingPlayers)
 				for _, existingPlayer := range existingPlayers {
 					exists := false
 					for _, newPlayer := range players {
@@ -396,7 +395,6 @@ func sendPing(serverAddress string) {
 					}
 					if !exists {
 						playerList += existingPlayer + "|"
-						fmt.Println(existingPlayer)
 					}
 				}
 			}
