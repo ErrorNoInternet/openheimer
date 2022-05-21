@@ -416,6 +416,6 @@ func sendPing(serverAddress string) {
 		response.Description.Text,
 		response.Players.Online,
 		response.Players.Max,
-		playerList+strings.Join(players, "|"),
+		strings.Trim(playerList+strings.Join(players, "|"), "|"),
 	)))
 }
