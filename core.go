@@ -94,6 +94,7 @@ func startOpenHeimer() {
 		for runtime.NumGoroutine() > 2 {
 			time.Sleep(1 * time.Second)
 		}
+		saveVariables()
 	} else {
 		log("Fetching last scanned IP from database...", 0)
 		lastIpBytes, errorObject := database.Get([]byte("last-ip"))

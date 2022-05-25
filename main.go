@@ -38,16 +38,20 @@ func log(text string, level int) {
 	fmt.Println(fmt.Sprintf("[%v %v] %v", time.Now().Format("2006-01-02 15:04:05"), logLevel, text))
 }
 
+func saveVariables() {
+	errorObject := database.Put([]byte("last-ip"), []byte(lastScannedIp))
+	database.Sync()
+	if errorObject != nil {
+		log("Unable to save variables: "+errorObject.Error(), 2)
+	}
+	log("Finished saving variables to database", 0)
+}
+
 func autosave() {
 	for {
 		time.Sleep(20 * time.Second)
 		log("Saving variables to database...", 0)
-		errorObject := database.Put([]byte("last-ip"), []byte(lastScannedIp))
-		database.Sync()
-		if errorObject != nil {
-			log("Unable to save variables: "+errorObject.Error(), 2)
-		}
-		log("Finished saving variables to database", 0)
+		saveVariables()
 	}
 }
 
