@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	version         string = "0.0.1"
+	version         string = "0.0.2"
 	minimumLogLevel int    = 0
 	maxGoroutines   int
 	maxTimeout      int
@@ -67,7 +67,8 @@ func main() {
 			"\t-v, --verbose\t\tDisplay everthing that's currently happening\n"+
 			"\t-q, --query\t\tQuery something from the database\n"+
 			"\t\t--server\t\tQuery a Minecraft server from the database\n"+
-			"\t\t--player\t\tQuery a Minecraft player from the database",
+			"\t\t--player\t\tQuery a Minecraft player from the database\n"+
+			"\t\t--version\t\tQuery the Minecraft versions from the database",
 		version,
 	)
 	if len(os.Args) == 1 {
@@ -83,8 +84,10 @@ func main() {
 	queryData := false
 	queryDataServer := false
 	queryDataPlayer := false
+	queryDataVersion := false
 	queriedDataServer := false
 	queriedDataPlayer := false
+	queriedDataVersion := false
 	query := ""
 	maxGoroutines = 10000
 	maxTimeout = 5
@@ -105,6 +108,9 @@ func main() {
 			} else if argument == "--player" && queryData == true {
 				queryDataPlayer = true
 				queriedDataPlayer = true
+			} else if argument == "--version" && queryData == true {
+				queryDataVersion = true
+				queriedDataVersion = true
 			} else if argument == "--file" && startScanning == true {
 				startCustomFile = true
 			} else if argument == "--goroutines" && startScanning == true {
@@ -120,6 +126,9 @@ func main() {
 				} else if queryDataPlayer {
 					query = argument
 					queryDataPlayer = false
+				} else if queryDataVersion {
+					query = argument
+					queryDataVersion = false
 				} else if startGoroutineCount {
 					var errorObject error
 					maxGoroutines, errorObject = strconv.Atoi(argument)
@@ -177,9 +186,65 @@ func main() {
 		return
 	}
 	if queryData {
-		if queriedDataServer == false && queriedDataPlayer == false {
+		if queriedDataServer == false && queriedDataPlayer == false && queriedDataVersion == false {
 			fmt.Println("You need to specify something to query!")
 			return
+		} else if queriedDataVersion && query == "" {
+			fmt.Println("List of found Minecraft versions:")
+			versionMap := make(map[string]int)
+			for key := range database.Keys() {
+				if string(key) != "last-ip" {
+					serverData, errorObject := database.Get(key)
+					if errorObject != nil {
+						fmt.Println("Unable to query server: " + errorObject.Error())
+						return
+					}
+					segments := strings.Split(string(serverData), "\n")
+					for _, segment := range segments {
+						if strings.HasPrefix(segment, "version:") {
+							version := strings.Split(segment, "version:")[1]
+							if !strings.Contains(version, "§") {
+								currentCount, ok := versionMap[version]
+								if ok {
+									versionMap[version] = currentCount + 1
+								} else {
+									versionMap[version] = 1
+								}
+							}
+						}
+					}
+				}
+			}
+			for version, count := range versionMap {
+				fmt.Println(fmt.Sprintf("%v (%v)", version, count))
+			}
+		} else if queriedDataVersion && query != "" {
+			fmt.Printf("List of found Minecraft servers (%v):\n", query)
+			found := false
+			for key := range database.Keys() {
+				if string(key) != "last-ip" {
+					serverData, errorObject := database.Get(key)
+					if errorObject != nil {
+						fmt.Println("Unable to query server: " + errorObject.Error())
+						return
+					}
+					segments := strings.Split(string(serverData), "\n")
+					for _, segment := range segments {
+						if strings.HasPrefix(segment, "version:") {
+							version := strings.Split(segment, "version:")[1]
+							if !strings.Contains(version, "§") {
+								if version == query {
+									found = true
+									fmt.Println(string(key))
+								}
+							}
+						}
+					}
+				}
+			}
+			if !found {
+				fmt.Println("Unable to query database: no servers with matching version found")
+			}
 		} else if queriedDataServer && query == "" {
 			fmt.Println("List of found Minecraft servers:")
 			for key := range database.Keys() {
@@ -197,8 +262,8 @@ func main() {
 			for _, segment := range segments {
 				key := strings.Split(segment, ":")[0]
 				value := strings.Split(segment, ":")[1]
-				timestamp, _ := strconv.Atoi(value)
 				if key == "time" {
+					timestamp, _ := strconv.Atoi(value)
 					fmt.Println("Time: " + time.Unix(int64(timestamp), 0).Format("2006-01-02 15:04:05") + " (" + value + ")")
 				}
 				if key == "version" {
@@ -268,8 +333,8 @@ func main() {
 									for _, segment := range segments {
 										key := strings.Split(segment, ":")[0]
 										value := strings.Split(segment, ":")[1]
-										timestamp, _ := strconv.Atoi(value)
 										if key == "time" {
+											timestamp, _ := strconv.Atoi(value)
 											fmt.Println("Time: " + time.Unix(int64(timestamp), 0).Format("2006-01-02 15:04:05") + " (" + value + ")")
 										}
 										if key == "version" {
