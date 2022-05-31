@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -11,7 +12,7 @@ import (
 )
 
 var (
-	version         string = "0.0.2"
+	version         string = "0.0.3"
 	minimumLogLevel int    = 0
 	maxGoroutines   int
 	maxTimeout      int
@@ -233,7 +234,7 @@ func main() {
 						if strings.HasPrefix(segment, "version:") {
 							version := strings.Split(segment, "version:")[1]
 							if !strings.Contains(version, "§") {
-								if version == query {
+								if regexp.MustCompile(query).Match([]byte(version)) {
 									found = true
 									fmt.Println(string(key))
 								}
