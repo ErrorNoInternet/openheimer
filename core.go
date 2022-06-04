@@ -13,9 +13,9 @@ import (
 
 func sendPing(serverAddress string) {
 	pinger := mcpinger.New(serverAddress, 25565, mcpinger.McPingerOption(mcpinger.WithTimeout(time.Duration(maxTimeout)*time.Second)))
-	response, errorObject := pinger.Ping()
-	if errorObject != nil {
-		log(fmt.Sprintf("Unable to ping %v: %v", serverAddress, errorObject.Error()), -1)
+	response, err := pinger.Ping()
+	if err != nil {
+		log(fmt.Sprintf("Unable to ping %v: %v", serverAddress, err.Error()), -1)
 		return
 	}
 	players := []string{}
@@ -25,8 +25,8 @@ func sendPing(serverAddress string) {
 		}
 	}
 	playerList := ""
-	currentData, errorObject := database.Get([]byte(serverAddress))
-	if errorObject == nil {
+	currentData, err := database.Get([]byte(serverAddress))
+	if err == nil {
 		segments := strings.Split(string(currentData), "\n")
 		for _, segment := range segments {
 			if strings.HasPrefix(segment, "players_sample:") {
@@ -68,9 +68,9 @@ func sendPing(serverAddress string) {
 func startOpenHeimer() {
 	if ipAddressFile != "" {
 		log("Loading IPs from file: "+ipAddressFile, 1)
-		fileContent, errorObject := ioutil.ReadFile(ipAddressFile)
-		if errorObject != nil {
-			fmt.Println("Unable to read file: " + errorObject.Error())
+		fileContent, err := ioutil.ReadFile(ipAddressFile)
+		if err != nil {
+			fmt.Println("Unable to read file: " + err.Error())
 			return
 		}
 		lines := strings.Split(string(fileContent), "\n")
@@ -97,9 +97,9 @@ func startOpenHeimer() {
 		saveVariables()
 	} else {
 		log("Fetching last scanned IP from database...", 0)
-		lastIpBytes, errorObject := database.Get([]byte("last-ip"))
-		if errorObject != nil {
-			log("Unable to fetch last scanned IP: "+errorObject.Error(), 0)
+		lastIpBytes, err := database.Get([]byte("last-ip"))
+		if err != nil {
+			log("Unable to fetch last scanned IP: "+err.Error(), 0)
 			lastIpBytes = []byte("1.0.0.0")
 		}
 		lastIp := string(lastIpBytes)
