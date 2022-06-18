@@ -21,3 +21,4 @@ OpenHeimer v0.0.2
 		--version		Query the Minecraft versions from the database
 ```
 
+<sub>If you would like to modify or use this repository (including its code) in your own project, please be sure to credit!</sub>
