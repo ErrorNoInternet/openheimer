@@ -1,7 +1,7 @@
 # OpenHeimer
 OpenHeimer is the (unofficial) open source version of the Copenheimer project. It scans the entire internet in order to find public Minecraft servers. The original version is currently closed-source and not available to anyone else, that's why this version exists.
 
-:warning: OpenHeimer is under heavy development. The current version of OpenHeimer (v0.0.1) is not stable and might crash (or break) anytime. Feel free to submit an issue or a pull reuqest!
+:warning: OpenHeimer is under heavy development. The current version of OpenHeimer (v0.0.2) is not stable and might crash (or break) anytime. Feel free to submit an issue or a pull reuqest!
 
 ## Usage
 View `openheimer --help` to see a list of commands
@@ -10,7 +10,7 @@ OpenHeimer v0.0.2
 
 	-h, --help		Display a list of available arguments
 	-s, --start		Run OpenHeimer and start scanning IPs
-		--file		Scan all the IP addresses specified in the file
+		--file			Scan all the IP addresses specified in the file
 		--goroutines		Maximum number of goroutines (10000)
 		--timeout		Maximum number of seconds to wait (5 seconds)
 		--ip-address		Specify which IP address to start scanning from
@@ -21,3 +21,4 @@ OpenHeimer v0.0.2
 		--version		Query the Minecraft versions from the database
 ```
 
+<sub>If you would like to modify or use this repository (including its code) in your own project, please be sure to credit!</sub>
