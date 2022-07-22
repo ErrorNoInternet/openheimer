@@ -26,7 +26,9 @@ func readFromFile(filePath string, outputChannel chan string) int {
 	}
 	log.Printf("Successfully read %v IP addresses from file\n", len(ips))
 	for _, ip := range ips {
-		outputChannel <- ip
+		if strings.TrimSpace(ip) != "" {
+			outputChannel <- ip
+		}
 	}
 
 	time.Sleep(100 * time.Millisecond)
@@ -78,6 +80,9 @@ func generateIPs(startingIP string, outputChannel chan string) int {
 
 func validateIPs(ips []string) (bool, int) {
 	for index, ip := range ips {
+		if strings.TrimSpace(ip) == "" {
+			continue
+		}
 		segments := strings.Split(ip, ".")
 		if len(segments) != 4 {
 			return false, index
