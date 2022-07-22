@@ -60,7 +60,7 @@ func scanIP(ip string, mutex *sync.Mutex) {
 	log.Printf("Found Minecraft server at %v\n", ip)
 	err = database.Write(ip, jsonObject)
 	if err != nil {
-		log.Printf("Unable to save server details: %v\n", err.Error())
+		log.Printf("Unable to write to database: %v\n", err.Error())
 		return
 	}
 
