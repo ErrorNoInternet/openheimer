@@ -82,6 +82,7 @@ func main() {
 	for pinging || scanning {
 		time.Sleep(1 * time.Second)
 	}
+	log.Printf("Pinged: %v, Scanned: %v, Valid: %v\n", pinged, scanned, valid)
 }
 
 func displayStatus() {
