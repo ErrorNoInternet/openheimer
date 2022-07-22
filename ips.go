@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-var lastScannedIP string
-
 func readFromFile(filePath string, outputChannel chan string) int {
 	log.Printf("Reading IPs from %v...\n", filePath)
 	fileData, err := ioutil.ReadFile(filePath)
@@ -51,7 +49,6 @@ func generateIPs(startingIP string, outputChannel chan string) int {
 	segmentD, _ := strconv.Atoi(segments[3])
 	for {
 		serverIP := fmt.Sprintf("%v.%v.%v.%v", segmentA, segmentB, segmentC, segmentD)
-		lastScannedIP = serverIP
 		outputChannel <- serverIP
 
 		segmentD += 1
