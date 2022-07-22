@@ -24,5 +24,6 @@ Usage of openheimer:
   -version
         Display the current version of OpenHeimer
 ```
+Note: `maxPingWorkers` are the amount of workers to use to check for open ports. `maxScanWorkers` are the amount of workers to use to check if an IP has a valid Minecraft server. Normally you would increase `maxPingWorkers` to ping IP addresses faster, but when you're scanning IP addresses from a file (produced by masscan for example), you should increase `maxScanWorkers`.
 
 <sub>If you would like to modify or use this repository (including its code) in your own project, please be sure to credit!</sub>
