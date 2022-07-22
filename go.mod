@@ -1,4 +1,4 @@
-module github.com/ErrorNoInternet/OpenHeimer
+module github.com/ErrorNoInternet/openheimer
 
 go 1.18
 
