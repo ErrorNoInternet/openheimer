@@ -52,6 +52,7 @@ func main() {
 		return
 	}
 
+	startTime := time.Now().Unix()
 	file, err := os.Create(logFile)
 	if err != nil {
 		log.Fatalf("Unable to create %v: %v\n", logFile, err.Error())
@@ -82,7 +83,7 @@ func main() {
 	for pinging || scanning {
 		time.Sleep(1 * time.Second)
 	}
-	log.Printf("Pinged: %v, Scanned: %v, Valid: %v\n", pinged, scanned, valid)
+	log.Printf("Done! Finished in %v seconds. Pinged: %v, Scanned: %v, Valid: %v\n", time.Now().Unix()-startTime, pinged, scanned, valid)
 }
 
 func displayStatus() {

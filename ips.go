@@ -25,7 +25,6 @@ func readFromFile(filePath string, outputChannel chan string) int {
 		return 1
 	}
 	log.Printf("Successfully read %v IP addresses from file\n", len(ips))
-
 	for _, ip := range ips {
 		outputChannel <- ip
 	}
