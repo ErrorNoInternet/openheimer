@@ -1,7 +1,7 @@
 # OpenHeimer
 OpenHeimer is the (unofficial) open source version of the Copenheimer project. It scans the entire internet in order to find public Minecraft servers. The original version is currently closed-source and not available to anyone else, that's why this version exists.
 
-Capable of scanning up to 16k IP addresses per second, finishing the entire internet in just 3 days!
+:rocket: Capable of scanning up to 16k IP addresses per second, finishing the entire internet in just 3 days! :rocket:
 
 ## Usage
 Run `openheimer -help` to see a list of commands
