@@ -55,13 +55,15 @@ func scanIP(ip string, mutex *sync.Mutex) {
 	jsonObject, err := json.Marshal(response)
 	if err != nil {
 		log.Printf("Unable to marshal server response: %v\n", err.Error())
+		mutex.Lock()
+		scanWorkers--
+		mutex.Unlock()
 		return
 	}
 	log.Printf("Found Minecraft server at %v\n", ip)
 	err = database.Write(ip, jsonObject)
 	if err != nil {
 		log.Printf("Unable to write to database: %v\n", err.Error())
-		return
 	}
 
 	mutex.Lock()
