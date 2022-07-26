@@ -9,7 +9,7 @@ import (
 	"github.com/PassTheMayo/mcstatus/v3"
 )
 
-func scanIPs(scanQueue chan string) {
+func scanIPs() {
 	scanning = true
 	var mutex sync.Mutex
 	if *verbose {

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func pingIPs(ipChannel chan string) {
+func pingIPs() {
 	pinging = true
 	var mutex sync.Mutex
 	if *verbose {

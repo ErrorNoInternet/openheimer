@@ -65,8 +65,8 @@ func main() {
 		CacheSizeMax: 1024 * 1024,
 	})
 	go displayStatus()
-	go pingIPs(ipChannel)
-	go scanIPs(scanQueue)
+	go pingIPs()
+	go scanIPs()
 	if ipFile != "" {
 		result := readFromFile(ipFile, ipChannel)
 		if result == 1 {
