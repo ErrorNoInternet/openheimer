@@ -32,7 +32,6 @@ var (
 	maxPingWorkers int
 	maxScanWorkers int
 	verbose        *bool
-	displayVersion *bool
 )
 
 func main() {
@@ -44,7 +43,7 @@ func main() {
 	flag.IntVar(&maxPingWorkers, "maxPingWorkers", 4000, "The maximum amount of workers to ping IPs")
 	flag.IntVar(&maxScanWorkers, "maxScanWorkers", 1000, "The maximum amount of workers to scan IPs")
 	verbose = flag.Bool("verbose", false, "Display everything that's happening")
-	displayVersion = flag.Bool("version", false, "Display the current version of OpenHeimer")
+	displayVersion := flag.Bool("version", false, "Display the current version of OpenHeimer")
 	flag.Parse()
 
 	if *displayVersion {
