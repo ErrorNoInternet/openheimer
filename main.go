@@ -82,7 +82,7 @@ func main() {
 	for pinging || scanning {
 		time.Sleep(1 * time.Second)
 	}
-	log.Printf("Done! Finished in %v seconds. Pinged: %v, Scanned: %v, Valid: %v\n", time.Now().Unix()-startTime, pinged, scanned, valid)
+	log.Printf("Done! Finished in %v seconds. Pinged: %v, Scanned: %v, Valid: %v.\n", time.Now().Unix()-startTime, pinged, scanned, valid)
 }
 
 func displayStatus() {
