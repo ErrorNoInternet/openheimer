@@ -39,7 +39,7 @@ func main() {
 	flag.StringVar(&logFile, "logFile", "openheimer.log", "The file to store the logs in")
 	flag.StringVar(&ipFile, "ipFile", "", "The file to extract IP addresses from")
 	flag.StringVar(&startingIP, "startingIP", "1.0.0.0", "The IP address to start scanning from")
-	flag.IntVar(&timeout, "timeout", 5, "The amount of time to wait before timing out")
+	flag.IntVar(&timeout, "timeout", 5, "The amount of seconds to wait before timing out")
 	flag.IntVar(&maxPingWorkers, "maxPingWorkers", 4000, "The maximum amount of workers to ping IPs")
 	flag.IntVar(&maxScanWorkers, "maxScanWorkers", 1000, "The maximum amount of workers to scan IPs")
 	verbose = flag.Bool("verbose", false, "Display everything that's happening")
