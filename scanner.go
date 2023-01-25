@@ -3,13 +3,15 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/PassTheMayo/mcstatus/v3"
 )
 
-func scanIPs() {
+func scanIps() {
 	scanning = true
 	var mutex sync.Mutex
 	if *verbose {
@@ -21,11 +23,19 @@ func scanIPs() {
 			time.Sleep(100 * time.Millisecond)
 		}
 
-		ip := <-scanQueue
-		if ip == "end" {
+		address := <-scanQueue
+		if address == "end" {
 			break
 		}
-		go scanIP(ip, &mutex)
+		ip := address
+		var port uint16 = 25565
+		if strings.Contains(address, ":") {
+			segments := strings.Split(address, ":")
+			ip = segments[0]
+			parsedPort, _ := strconv.ParseUint(segments[1], 10, 16)
+			port = uint16(parsedPort)
+		}
+		go scanIp(ip, port, &mutex)
 		mutex.Lock()
 		scanWorkers++
 		scanned++
@@ -38,14 +48,14 @@ func scanIPs() {
 	scanning = false
 }
 
-func scanIP(ip string, mutex *sync.Mutex) {
+func scanIp(ip string, port uint16, mutex *sync.Mutex) {
 	if *verbose {
 		log.Printf("Scanning %v...\n", ip)
 	}
-	response, err := mcstatus.Status(ip, 25565, mcstatus.JavaStatusOptions{Timeout: time.Second * time.Duration(timeout)})
+	response, err := mcstatus.Status(ip, port, mcstatus.JavaStatusOptions{Timeout: time.Second * time.Duration(timeout)})
 	if err != nil {
 		if *verbose {
-			log.Printf("Unable to scan %v: %v\n", ip, err.Error())
+			log.Printf("Unable to scan %v:%v: %v\n", ip, port, err.Error())
 		}
 		mutex.Lock()
 		scanWorkers--
@@ -60,7 +70,7 @@ func scanIP(ip string, mutex *sync.Mutex) {
 		mutex.Unlock()
 		return
 	}
-	log.Printf("Found Minecraft server at %v\n", ip)
+	log.Printf("Found Minecraft server at %v:%v\n", ip, port)
 	err = database.Write(ip, jsonObject)
 	if err != nil {
 		log.Printf("Unable to write to database: %v\n", err.Error())

@@ -12,22 +12,22 @@ import (
 )
 
 var (
-	version     string = "0.1.0"
-	database    *diskv.Diskv
-	ipChannel   chan string = make(chan string)
-	scanQueue   chan string = make(chan string)
-	pingWorkers int
-	scanWorkers int
-	pinging     bool
-	scanning    bool
-	pinged      int64
-	scanned     int64
-	valid       int64
+	version        string = "0.1.1"
+	database       *diskv.Diskv
+	addressChannel chan string = make(chan string)
+	scanQueue      chan string = make(chan string)
+	pingWorkers    int
+	scanWorkers    int
+	pinging        bool
+	scanning       bool
+	pinged         int64
+	scanned        int64
+	valid          int64
 
 	databasePath   string
 	logFile        string
 	ipFile         string
-	startingIP     string
+	startingIp     string
 	timeout        int
 	maxPingWorkers int
 	maxScanWorkers int
@@ -38,7 +38,7 @@ func main() {
 	flag.StringVar(&databasePath, "database", "openheimer.db", "The database to store the results in")
 	flag.StringVar(&logFile, "logFile", "openheimer.log", "The file to store the logs in")
 	flag.StringVar(&ipFile, "ipFile", "", "The file to extract IP addresses from")
-	flag.StringVar(&startingIP, "startingIP", "1.0.0.0", "The IP address to start scanning from")
+	flag.StringVar(&startingIp, "startingIp", "1.0.0.0", "The IP address to start scanning from")
 	flag.IntVar(&timeout, "timeout", 5, "The amount of seconds to wait before timing out")
 	flag.IntVar(&maxPingWorkers, "maxPingWorkers", 4000, "The maximum amount of workers to ping IPs")
 	flag.IntVar(&maxScanWorkers, "maxScanWorkers", 1000, "The maximum amount of workers to scan IPs")
@@ -65,15 +65,15 @@ func main() {
 		CacheSizeMax: 1024 * 1024,
 	})
 	go displayStatus()
-	go pingIPs()
-	go scanIPs()
+	go pingIps()
+	go scanIps()
 	if ipFile != "" {
-		result := readFromFile(ipFile, ipChannel)
+		result := readFromFile(ipFile, addressChannel)
 		if result == 1 {
 			return
 		}
 	} else {
-		result := generateIPs(startingIP, ipChannel)
+		result := generateIps(startingIp, addressChannel)
 		if result == 1 {
 			return
 		}

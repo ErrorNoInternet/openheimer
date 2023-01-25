@@ -3,11 +3,12 @@ package main
 import (
 	"log"
 	"net"
+	"strings"
 	"sync"
 	"time"
 )
 
-func pingIPs() {
+func pingIps() {
 	pinging = true
 	var mutex sync.Mutex
 	if *verbose {
@@ -19,11 +20,17 @@ func pingIPs() {
 			time.Sleep(100 * time.Millisecond)
 		}
 
-		ip := <-ipChannel
-		if ip == "end" {
+		address := <-addressChannel
+		if address == "end" {
 			break
 		}
-		go pingIP(ip, &mutex)
+		ip, port := address, "25565"
+		if strings.Contains(address, ":") {
+			segments := strings.Split(address, ":")
+			ip = segments[0]
+			port = segments[1]
+		}
+		go pingIp(ip, port, &mutex)
 		mutex.Lock()
 		pingWorkers++
 		pinged++
@@ -37,11 +44,11 @@ func pingIPs() {
 	pinging = false
 }
 
-func pingIP(ip string, mutex *sync.Mutex) {
-	connection, err := net.DialTimeout("tcp", net.JoinHostPort(ip, "25565"), time.Second*time.Duration(timeout))
+func pingIp(ip string, port string, mutex *sync.Mutex) {
+	connection, err := net.DialTimeout("tcp", net.JoinHostPort(ip, port), time.Second*time.Duration(timeout))
 	if err != nil {
 		if *verbose {
-			log.Printf("Unable to ping %v: %v\n", ip, err.Error())
+			log.Printf("Unable to ping %v:%v: %v\n", ip, port, err.Error())
 		}
 		mutex.Lock()
 		pingWorkers--
