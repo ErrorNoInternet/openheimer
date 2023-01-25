@@ -51,7 +51,7 @@ func scanIps() {
 
 func scanIp(ip string, port uint16, mutex *sync.Mutex) {
 	if *verbose {
-		log.Printf("Scanning %v...\n", ip)
+		log.Printf("Scanning %v:%v...\n", ip, port)
 	}
 	response, err := mcstatus.Status(ip, port, mcstatus.JavaStatusOptions{Timeout: time.Second * time.Duration(timeout)})
 	if err != nil {
