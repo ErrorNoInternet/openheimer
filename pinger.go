@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"strings"
@@ -57,7 +58,7 @@ func pingIp(ip string, port string, mutex *sync.Mutex) {
 	}
 	if connection != nil {
 		defer connection.Close()
-		scanQueue <- ip
+		scanQueue <- fmt.Sprintf("%v:%v", ip, port)
 	}
 
 	mutex.Lock()
