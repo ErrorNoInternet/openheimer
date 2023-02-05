@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/PassTheMayo/mcstatus/v3"
+	mcpinger "github.com/Raqbit/mc-pinger"
 )
 
 func scanIps() {
@@ -53,7 +53,7 @@ func scanIp(ip string, port uint16, mutex *sync.Mutex) {
 	if *verbose {
 		log.Printf("Scanning %v:%v...\n", ip, port)
 	}
-	response, err := mcstatus.Status(ip, port, mcstatus.JavaStatusOptions{Timeout: time.Second * time.Duration(timeout)})
+	response, err := mcpinger.New(ip, port, mcpinger.WithTimeout(time.Second*time.Duration(timeout))).Ping()
 	if err != nil {
 		if *verbose {
 			log.Printf("Unable to scan %v:%v: %v\n", ip, port, err.Error())
