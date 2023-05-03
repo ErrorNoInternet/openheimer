@@ -21,6 +21,7 @@ fn main() {
     let logger = logger::Logger {
         verbosity: matches.get_count("verbosity") as usize,
     };
+
     logger.log_message(
         Information,
         &format!("Starting OpenHeimer v{}...", env!("CARGO_PKG_VERSION")),
