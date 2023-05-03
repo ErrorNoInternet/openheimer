@@ -2,42 +2,60 @@ use chrono::Local;
 use colored::*;
 
 pub enum LogMessageType {
+    Verbose1 = 1,
+    Verbose2 = 2,
+    Verbose3 = 3,
     Information,
     Error,
     Warning,
 }
 
-pub fn log_error<T, E: std::fmt::Display>(result: Result<T, E>) {
-    match result {
-        Ok(_) => (),
-        Err(error) => log_message(LogMessageType::Error, &error.to_string()),
-    }
+pub struct Logger {
+    pub verbosity: usize,
 }
+impl Logger {
+    pub fn log_error<T, E: std::fmt::Display>(&self, result: Result<T, E>) {
+        match result {
+            Ok(_) => (),
+            Err(error) => self.log_message(LogMessageType::Error, &error.to_string()),
+        }
+    }
 
-pub fn log_message(message_type: LogMessageType, message: &String) {
-    match message_type {
-        LogMessageType::Information => {
-            println!(
+    pub fn log_message(&self, message_type: LogMessageType, message: &str) {
+        match message_type {
+            LogMessageType::Information => {
+                println!(
+                    "{} {} {}",
+                    current_time(),
+                    colored_brackets(&"INFORMATION".bold().blue()),
+                    message
+                )
+            }
+            LogMessageType::Verbose1 | LogMessageType::Verbose2 | LogMessageType::Verbose3 => {
+                if self.verbosity >= message_type as usize {
+                    println!(
+                        "{} {} {}",
+                        current_time(),
+                        colored_brackets(&"VERBOSE".bold().blue()),
+                        message
+                    )
+                }
+            }
+            LogMessageType::Warning => {
+                eprintln!(
+                    "{} {} {}",
+                    current_time(),
+                    colored_brackets(&"WARNING".bold().yellow()),
+                    message
+                )
+            }
+            LogMessageType::Error => eprintln!(
                 "{} {} {}",
                 current_time(),
-                colored_brackets(&"INFORMATION".bold().blue()),
-                message
-            )
+                colored_brackets(&"ERROR".bold().red()),
+                message.red()
+            ),
         }
-        LogMessageType::Warning => {
-            eprintln!(
-                "{} {} {}",
-                current_time(),
-                colored_brackets(&"WARNING".bold().yellow()),
-                message
-            )
-        }
-        LogMessageType::Error => eprintln!(
-            "{} {} {}",
-            current_time(),
-            colored_brackets(&"ERROR".bold().red()),
-            message.red()
-        ),
     }
 }
 
