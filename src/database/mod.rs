@@ -5,7 +5,7 @@ use async_trait::async_trait;
 
 #[async_trait]
 pub trait Database {
-    async fn new() -> Result<Self, String>
+    async fn new(location: String) -> Result<Self, String>
     where
         Self: Sized;
     async fn add_server(server: minecraft::server::Server) -> Result<(), String>;

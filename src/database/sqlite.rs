@@ -10,9 +10,9 @@ pub struct SqliteDatabase {
 
 #[async_trait]
 impl Database for SqliteDatabase {
-    async fn new() -> Result<Self, String> {
+    async fn new(location: String) -> Result<Self, String> {
         let database = match SqlitePoolOptions::new()
-            .connect("sqlite://openheimer.db?mode=rwc")
+            .connect(format!("sqlite://{location}?mode=rwc").as_str())
             .await
         {
             Ok(database) => database,
