@@ -1,5 +1,12 @@
 #[derive(Clone, Default)]
 pub struct Server {
+    address: String,
+    offline_mode: bool,
+    whitelisted: bool,
+    first_seen: u64,
+    last_seen: u64,
+    extra_data_json: String,
+
     version_name: String,
     protocol_version: i32,
     favicon: String,
@@ -10,14 +17,7 @@ pub struct Server {
     players_json: String,
     mod_info_type: String,
     mod_info_list_json: String,
-    offline_mode: bool,
-    whitelisted: bool,
-    extra_data_json: String,
+    enforces_secure_chat: bool,
 }
 
-impl Server {
-    fn from_json(json: String) -> Result<Self, String> {
-        // TODO: Parse JSON
-        Ok(Server::default())
-    }
-}
+impl Server {}

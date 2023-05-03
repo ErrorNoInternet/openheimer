@@ -1,12 +1,10 @@
 #[derive(Clone, Default)]
 pub struct Player {
+    first_seen: u64,
+    last_seen: u64,
+
     name: String,
     uuid: String,
 }
 
-impl Player {
-    fn from_json(json: String) -> Result<Self, String> {
-        // TODO: Parse JSON
-        Ok(Player::default())
-    }
-}
+impl Player {}
