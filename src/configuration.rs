@@ -16,7 +16,7 @@ impl Default for Configuration {
     fn default() -> Self {
         Configuration {
             database: DatabaseConfiguration {
-                provider: "sqlite".to_string(),
+                provider: "sqlite3".to_string(),
                 location: "openheimer.db".to_string(),
             },
         }
