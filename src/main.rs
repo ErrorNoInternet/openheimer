@@ -44,9 +44,9 @@ fn main() {
             Verbose1,
             "Saving default configuration to openheimer.toml...",
         );
-        let defualt_configuration_string = Configuration::default().to_string();
-        configuration_string = defualt_configuration_string.clone();
-        match std::fs::write("openheimer.toml", &defualt_configuration_string) {
+        let default_configuration_string = Configuration::default().to_string();
+        configuration_string = default_configuration_string.clone();
+        match std::fs::write("openheimer.toml", &default_configuration_string) {
             Ok(_) => (),
             Err(error) => {
                 logger.log_error("Unable to write to openheimer.toml", &error);
