@@ -14,11 +14,11 @@ pub struct Logger {
     pub verbosity: usize,
 }
 impl Logger {
-    pub fn log_error<T, E: std::fmt::Display>(&self, result: Result<T, E>) {
-        match result {
-            Ok(_) => (),
-            Err(error) => self.log_message(LogMessageType::Error, &error.to_string()),
-        }
+    pub fn log_error(&self, error_description: &str, error: &impl std::fmt::Display) {
+        self.log_message(
+            LogMessageType::Error,
+            &format!("{} ({})", &error_description, &error.to_string()),
+        );
     }
 
     pub fn log_message(&self, message_type: LogMessageType, message: &str) {
