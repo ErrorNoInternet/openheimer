@@ -29,7 +29,7 @@ fn main() {
         &format!("Starting OpenHeimer v{}...", env!("CARGO_PKG_VERSION")),
     );
 
-    let mut configuration_string;
+    let configuration_string;
     if std::path::Path::new("openheimer.toml").exists() {
         logger.log_message(Verbose1, "Reading configuration from openheimer.toml...");
         configuration_string = match std::fs::read_to_string("openheimer.toml") {
@@ -56,5 +56,15 @@ fn main() {
     }
 
     logger.log_message(Verbose3, "Parsing configuration from string...");
-    let configuration = Configuration::from_str(&configuration_string);
+    let configuration = match Configuration::from_str(&configuration_string) {
+        Ok(configuration) => configuration,
+        Err(error) => {
+            logger.log_error("Unable to parse configuration", &error);
+            return;
+        }
+    };
+    logger.log_message(
+        Verbose3,
+        &format!("Loaded configuration:\n{}", configuration.to_string()),
+    )
 }
