@@ -6,13 +6,15 @@ pub enum LogMessageType {
     Verbose2 = 2,
     Verbose3 = 3,
     Information,
-    Error,
     Warning,
+    ConfigurationWarning,
+    Error,
 }
 
 pub struct Logger {
     pub verbosity: usize,
 }
+
 impl Logger {
     pub fn log_error(&self, error_description: &str, error: &impl std::fmt::Display) {
         self.log_message(
@@ -23,14 +25,6 @@ impl Logger {
 
     pub fn log_message(&self, message_type: LogMessageType, message: &str) {
         match message_type {
-            LogMessageType::Information => {
-                println!(
-                    "{} {} {}",
-                    current_time(),
-                    colored_brackets(&"INFORMATION".bold().blue()),
-                    message
-                )
-            }
             LogMessageType::Verbose1 | LogMessageType::Verbose2 | LogMessageType::Verbose3 => {
                 if self.verbosity >= message_type as usize {
                     println!(
@@ -41,11 +35,28 @@ impl Logger {
                     )
                 }
             }
+            LogMessageType::Information => {
+                println!(
+                    "{} {} {}",
+                    current_time(),
+                    colored_brackets(&"INFORMATION".bold().blue()),
+                    message
+                )
+            }
             LogMessageType::Warning => {
                 eprintln!(
                     "{} {} {}",
                     current_time(),
                     colored_brackets(&"WARNING".bold().yellow()),
+                    message
+                )
+            }
+            LogMessageType::ConfigurationWarning => {
+                eprintln!(
+                    "{} {} {} {}",
+                    current_time(),
+                    colored_brackets(&"WARNING".bold().yellow()),
+                    colored_brackets(&"CONFIGURATION".bold().yellow()),
                     message
                 )
             }
