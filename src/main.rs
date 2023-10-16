@@ -40,7 +40,7 @@ fn main() {
         };
     } else {
         logger.log_message(
-            Verbose1,
+            Information,
             "Saving default configuration to openheimer.toml...",
         );
         let default_configuration_string = Configuration::default().to_string();
