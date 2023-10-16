@@ -3,25 +3,24 @@ mod database;
 mod logger;
 mod minecraft;
 
-use clap::{Arg, ArgAction, Command};
+use clap::{ArgAction, Parser};
 use configuration::Configuration;
 use logger::LogMessageType::*;
 use std::str::FromStr;
 
-fn main() {
-    let matches = Command::new("openheimer")
-        .about("The final word in Minecraft server scanners")
-        .arg(
-            Arg::new("verbosity")
-                .short('v')
-                .long("verbose")
-                .help("Sets the level of verbosity")
-                .action(ArgAction::Count),
-        )
-        .get_matches();
+/// The final word in Minecraft server scanners
+#[derive(Parser)]
+#[command(author, version, about, long_about = None)]
+struct Arguments {
+    /// Level of verbosity (can be supplied up to 3 times)
+    #[arg(short, long, action = ArgAction::Count)]
+    verbosity: u8,
+}
 
+fn main() {
+    let arguments = Arguments::parse();
     let logger = logger::Logger {
-        verbosity: matches.get_count("verbosity") as usize,
+        verbosity: arguments.verbosity as usize,
     };
 
     logger.log_message(
