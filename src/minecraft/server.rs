@@ -1,4 +1,6 @@
-#[derive(Clone, Default)]
+use serde::Serialize;
+
+#[derive(Clone, Default, Serialize)]
 pub struct Server {
     address: String,
     offline_mode: bool,
