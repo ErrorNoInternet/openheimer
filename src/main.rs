@@ -65,6 +65,6 @@ fn main() {
     };
     logger.log_message(
         Verbose3,
-        &format!("Loaded configuration:\n{}", configuration.to_string()),
+        &format!("Loaded configuration:\n{configuration:?}"),
     )
 }
