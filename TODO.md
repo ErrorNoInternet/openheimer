@@ -1,0 +1,2 @@
+- [ ] Rewrite logger using `log`
+- [ ] Add a few basic tests
