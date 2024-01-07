@@ -1,3 +1,5 @@
+- [ ] GitHub projects
+
 - [ ] Rewrite logger using `log`
 - [ ] Add a few basic tests
 - [ ] (nix) Read version from Cargo.toml
