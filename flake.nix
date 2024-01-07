@@ -1,50 +1,65 @@
 {
-    description = "openheimer flake";
+  description = "openheimer";
 
-    inputs = {
-        nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-        mozilla.url = "github:mozilla/nixpkgs-mozilla";
-        flake-utils.url = "github:numtide/flake-utils";
-    };
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+    rust-overlay.url = "github:oxalica/rust-overlay";
+  };
 
-    outputs = { self, nixpkgs, mozilla, flake-utils }:
-        (flake-utils.lib.eachDefaultSystem (system:
-            let
-                overlays = [ self.inputs.mozilla.overlays.rust ];
-                pkgs = import nixpkgs { inherit system overlays; };
-                channel = pkgs.rustChannelOf {
-                    date = "2023-10-11";
-                    channel = "nightly";
-                    sha256 = "sha256-gq7H6KCWVbf5rp6ceZVomtz/DOxM40i4TeWCIKxNAr8=";
-                };
-                rust = (channel.rust.override {
-                    targets = [
-                        "x86_64-unknown-linux-gnu"
-                        "x86_64-unknown-linux-musl"
-                    ];
-                    extensions = [ "rust-src" ];
-                });
-            in rec
-            {
-                devShells.default = pkgs.mkShell {
-                    name = "rust-environment";
-                    nativeBuildInputs = [];
-                    buildInputs = [ rust ];
+  outputs = {
+    self,
+    nixpkgs,
+    flake-utils,
+    rust-overlay,
+  }:
+    flake-utils.lib.eachDefaultSystem (system: let
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [rust-overlay.overlays.default];
+      };
+      pkgsStatic = pkgs.pkgsStatic;
+      pkgsCross = pkgs.pkgsCross;
+      rust = pkgs.rust-bin.nightly.latest.default.override {
+        targets = [
+          "x86_64-unknown-linux-gnu"
+          "x86_64-unknown-linux-musl"
+          "i686-unknown-linux-musl"
+          "x86_64-pc-windows-gnu"
+        ];
+        extensions = [
+          "rust-src"
+          "rust-analyzer-preview"
+        ];
+      };
+    in rec {
+      devShell = pkgs.mkShell {
+        name = "openheimer";
+        buildInputs = with pkgs; [
+          clang
+          libgit2
+          mold
+          pkgsCross.mingwW64.buildPackages.gcc
+          rust
+        ];
 
-                    PKG_CONFIG_ALLOW_CROSS = true;
-                    PKG_CONFIG_ALL_STATIC = true;
-                    LIBZ_SYS_STATIC = 1;
-                };
+        CARGO_TARGET_X86_64_PC_WINDOWS_GNU_RUSTFLAGS = "-L native=${pkgsCross.mingwW64.windows.mingw_w64_pthreads}/lib";
+        LIBZ_SYS_STATIC = 1;
+        OPENSSL_DIR = pkgsStatic.openssl.dev;
+        OPENSSL_LIB_DIR = "${pkgsStatic.openssl.out}/lib";
+        OPENSSL_STATIC = 1;
+        PKG_CONFIG_ALLOW_CROSS = true;
+        PKG_CONFIG_ALL_STATIC = true;
+      };
 
-                packages.openheimer = pkgs.rustPlatform.buildRustPackage {
-                    pname = "openheimer";
-                    version = "2.0.0-alpha";
-                    cargoLock.lockFile = ./Cargo.lock;
-                    src = pkgs.lib.cleanSource ./.;
-                    nativeBuildInputs = [ pkgs.pkg-config ];
-                    buildInputs = [ pkgs.udev ];
-                };
-                defaultPackage = packages.openheimer;
-            }
-        ));
+      packages.openheimer = pkgs.rustPlatform.buildRustPackage {
+        pname = "openheimer";
+        version = "2.0.0-alpha";
+        cargoLock.lockFile = ./Cargo.lock;
+        src = pkgs.lib.cleanSource ./.;
+        nativeBuildInputs = [pkgs.pkg-config];
+        buildInputs = [pkgs.udev];
+      };
+      defaultPackage = packages.openheimer;
+    });
 }
