@@ -4,6 +4,7 @@ cargo-features = ["trim-paths"]
 name = "openheimer"
 version = "2.0.0-alpha"
 edition = "2021"
+build = "build.rs"
 
 [profile.release]
 codegen-units = 1
