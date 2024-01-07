@@ -26,6 +26,4 @@ pub trait Database {
         &mut self,
         player: &minecraft::player::Player,
     ) -> Result<(), DatabaseError>;
-
-    // TODO: Add CLI configuration options
 }
