@@ -1,6 +1,7 @@
 mod configuration;
 mod database;
 mod logger;
+mod metadata;
 mod minecraft;
 
 use clap::{ArgAction, Parser};
@@ -25,7 +26,11 @@ fn main() {
 
     logger.log_message(
         Information,
-        &format!("Starting OpenHeimer v{}...", env!("CARGO_PKG_VERSION")),
+        &format!(
+            "openheimer v{} ({})...",
+            metadata::VERSION,
+            metadata::GIT_HASH,
+        ),
     );
 
     let configuration_string;
