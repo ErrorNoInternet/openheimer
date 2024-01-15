@@ -6,7 +6,7 @@ mod minecraft;
 
 use clap::{ArgAction, Parser};
 use configuration::Configuration;
-use logger::LogMessageType::*;
+use logger::LogMessageType::{Information, Verbose1, Verbose3};
 use std::str::FromStr;
 
 /// The final word in Minecraft server scanners
@@ -51,7 +51,7 @@ fn main() {
         let default_configuration_string = Configuration::default().to_string();
         configuration_string = default_configuration_string.clone();
         match std::fs::write("openheimer.toml", &default_configuration_string) {
-            Ok(_) => (),
+            Ok(()) => (),
             Err(error) => {
                 logger.log_error("Unable to write to openheimer.toml", &error);
                 return;
@@ -70,5 +70,5 @@ fn main() {
     logger.log_message(
         Verbose3,
         &format!("Loaded configuration:\n{configuration:?}"),
-    )
+    );
 }

@@ -1,5 +1,5 @@
 use chrono::Local;
-use colored::*;
+use colored::{ColoredString, Colorize};
 
 pub enum LogMessageType {
     Verbose1 = 1,
@@ -32,7 +32,7 @@ impl Logger {
                         current_time(),
                         colored_brackets(&"VERBOSE".bold().blue()),
                         message
-                    )
+                    );
                 }
             }
             LogMessageType::Information => {
@@ -41,7 +41,7 @@ impl Logger {
                     current_time(),
                     colored_brackets(&"INFORMATION".bold().blue()),
                     message
-                )
+                );
             }
             LogMessageType::Warning => {
                 eprintln!(
@@ -49,7 +49,7 @@ impl Logger {
                     current_time(),
                     colored_brackets(&"WARNING".bold().yellow()),
                     message
-                )
+                );
             }
             LogMessageType::ConfigurationWarning => {
                 eprintln!(
@@ -58,7 +58,7 @@ impl Logger {
                     colored_brackets(&"WARNING".bold().yellow()),
                     colored_brackets(&"CONFIGURATION".bold().yellow()),
                     message
-                )
+                );
             }
             LogMessageType::Error => eprintln!(
                 "{} {} {}",

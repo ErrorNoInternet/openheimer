@@ -1,15 +1,14 @@
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use toml;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(default)]
-pub struct DatabaseConfiguration {
+pub struct Database {
     provider: String,
     location: String,
 }
 
-impl Default for DatabaseConfiguration {
+impl Default for Database {
     fn default() -> Self {
         Self {
             provider: "sqlite3".to_string(),
@@ -21,7 +20,7 @@ impl Default for DatabaseConfiguration {
 #[derive(Debug, Default, Deserialize, Serialize)]
 #[serde(default)]
 pub struct Configuration {
-    database: DatabaseConfiguration,
+    database: Database,
 }
 
 impl FromStr for Configuration {
