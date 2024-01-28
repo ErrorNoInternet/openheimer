@@ -20,6 +20,7 @@
       };
       pkgsStatic = pkgs.pkgsStatic;
       pkgsCross = pkgs.pkgsCross;
+
       rust = pkgs.rust-bin.nightly.latest.default.override {
         targets = [
           "x86_64-unknown-linux-gnu"
@@ -48,17 +49,24 @@
         OPENSSL_DIR = pkgsStatic.openssl.dev;
         OPENSSL_LIB_DIR = "${pkgsStatic.openssl.out}/lib";
         OPENSSL_STATIC = 1;
-        PKG_CONFIG_ALLOW_CROSS = true;
         PKG_CONFIG_ALL_STATIC = true;
+        PKG_CONFIG_ALLOW_CROSS = true;
+        RUST_BACKTRACE = 1;
       };
 
       packages.openheimer = pkgs.rustPlatform.buildRustPackage {
         pname = "openheimer";
         version = "2.0.0-alpha";
+
         cargoLock.lockFile = ./Cargo.lock;
         src = pkgs.lib.cleanSource ./.;
-        nativeBuildInputs = [pkgs.pkg-config];
-        buildInputs = [pkgs.udev];
+
+        nativeBuildInputs = with pkgs; [
+          clang
+          libgit2
+          mold
+          rust
+        ];
       };
       defaultPackage = packages.openheimer;
     });
