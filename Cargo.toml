@@ -7,11 +7,11 @@ edition = "2021"
 build = "build.rs"
 
 [build-dependencies]
-built = { version = "0.7.1", features = ["git2"] }
+built = { version = "0.7", features = ["git2"] }
 
 [profile.release]
 codegen-units = 1
-lto = "fat"
+lto = true
 trim-paths = "all"
 
 [dependencies]
