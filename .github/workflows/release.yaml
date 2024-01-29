@@ -1,0 +1,46 @@
+name: Release
+on:
+  release:
+    types: [created]
+
+jobs:
+  compile:
+    name: Compile
+    runs-on: ubuntu-22.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            path: target/x86_64-unknown-linux-musl/release/openheimer
+
+          - target: x86_64-pc-windows-gnu
+            path: target/x86_64-pc-windows-gnu/release/openheimer.exe
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v9
+        with:
+          extra-conf: |
+            log-lines = 500
+
+      - name: Set up Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v2
+
+      - name: Fetch dependencies
+        run: lib/fetch.sh
+
+      - name: Compile for ${{ matrix.target }}
+        run: nix develop -c cargo b -r --target ${{ matrix.target }}
+
+      - name: Upload build artifacts
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ matrix.path }}
+          asset_name: agent-${{ matrix.target }}
+          tag: ${{ github.ref }}
