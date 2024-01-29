@@ -1,6 +1,6 @@
 - [ ] GitHub projects
 
-- [ ] Rewrite logging using `tracing`
+- [x] Rewrite logging using `tracing`
 - [ ] Add a few basic tests
 - [ ] (nix) Read version from Cargo.toml
 - [ ] Reflect git commit hash in clap
