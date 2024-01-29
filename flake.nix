@@ -46,10 +46,12 @@
 
           buildInputs = with pkgs; [
             clang
+            curl
             libgit2
             mold
             pkgsCross.mingwW64.buildPackages.gcc
             rust
+            unzip
           ];
 
           CARGO_TARGET_X86_64_PC_WINDOWS_GNU_RUSTFLAGS = "-L native=${pkgsCross.mingwW64.windows.mingw_w64_pthreads}/lib";
