@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  rust:
-    name: Rust
+  rust-code:
+    name: Rust code
     runs-on: ubuntu-22.04
 
     steps:
