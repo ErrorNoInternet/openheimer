@@ -22,6 +22,7 @@ pub struct Arguments {
 
 #[derive(Debug, Subcommand)]
 pub enum MainSubcommand {
+    /// Manipulate openheimer configuration files
     Configuration {
         #[command(subcommand)]
         subcommand: ConfigurationSubcommand,
@@ -30,6 +31,9 @@ pub enum MainSubcommand {
 
 #[derive(Debug, Subcommand)]
 pub enum ConfigurationSubcommand {
+    /// Generate a default configuration file
     Default,
+
+    /// Add missing options to your existing configuration file
     Fill,
 }
