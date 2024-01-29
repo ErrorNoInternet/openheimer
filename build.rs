@@ -1,5 +1,3 @@
-// const WINPCAP_LIB_X32: &str = "libs/npcap/Lib/";
-// const WINPCAP_LIB_ARM: &str = "libs/npcap/Lib/ARM64/";
 const WINPCAP_LIB_X64: &str = "lib/npcap/Lib/x64/";
 
 fn main() {

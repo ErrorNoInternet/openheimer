@@ -14,8 +14,19 @@ use tracing_subscriber::prelude::*;
 fn main() {
     let arguments = Arguments::parse();
 
-    let mut default = false;
-    let options = if let Some(configuration_file) = arguments.configuration_file {
+    let (is_default, options) = get_options(arguments);
+
+    setup_logging(options.clone());
+
+    info!("openheimer {}", metadata::format());
+    if is_default {
+        warn!("falling back to default configuration!");
+    }
+    debug!("using configuration: {options:#?}");
+}
+
+fn get_options(arguments: Arguments) -> (bool, Configuration) {
+    if let Some(configuration_file) = arguments.configuration_file {
         trace!("reading configuration file...");
         let file_contents = match std::fs::read_to_string(configuration_file) {
             Ok(file_contents) => file_contents,
@@ -24,23 +35,24 @@ fn main() {
                 exit(1);
             }
         };
+
         trace!("parsing configuration file...");
         match Configuration::from_str(file_contents.as_str()) {
-            Ok(options) => options,
+            Ok(options) => (false, options),
             Err(error) => {
                 eprintln!("unable to read configuration file: {error}\n");
                 exit(1);
             }
         }
     } else {
-        default = true;
-        Configuration::default()
-    };
+        (true, Configuration::default())
+    }
+}
 
-    let binding = options.clone();
+fn setup_logging(options: Configuration) {
     let (file_appender, _guard) = tracing_appender::non_blocking(tracing_appender::rolling::daily(
-        binding.logger.directory,
-        binding.logger.prefix,
+        options.logger.directory,
+        options.logger.prefix,
     ));
     let file_layer = tracing_subscriber::fmt::layer()
         .with_file(true)
@@ -57,10 +69,4 @@ fn main() {
         Ok(()) => (),
         Err(error) => eprintln!("unable to set up logging: {error}"),
     };
-
-    info!("openheimer {}", metadata::format());
-    if default {
-        warn!("falling back to default configuration!");
-    }
-    debug!("using configuration: {options:#?}");
 }

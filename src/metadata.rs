@@ -10,5 +10,5 @@ pub const GIT_HASH: &str = if let Some(git_hash) = build_information::GIT_COMMIT
 };
 
 pub fn format() -> String {
-    format!("v{} ({})", VERSION, GIT_HASH)
+    format!("v{VERSION} ({GIT_HASH})")
 }

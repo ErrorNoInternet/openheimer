@@ -6,11 +6,11 @@ use tracing::level_filters::LevelFilter;
 #[derive(Debug, Parser)]
 #[command(author, version = metadata::format(), about, long_about = None)]
 pub struct Arguments {
-    /// How much information to log
+    /// Amount of information to log
     #[arg(short, long, default_value = "info")]
     pub verbosity: LevelFilter,
 
-    /// openheimer toml configuration file path
+    /// TOML configuration file path
     #[arg(short, long)]
     pub configuration_file: Option<String>,
 }
