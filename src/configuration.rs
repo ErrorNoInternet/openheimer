@@ -1,7 +1,30 @@
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[serde(default)]
+pub struct Configuration {
+    pub logger: Logger,
+    pub database: Database,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(default)]
+pub struct Logger {
+    pub directory: String,
+    pub prefix: String,
+}
+
+impl Default for Logger {
+    fn default() -> Self {
+        Self {
+            directory: "openheimer/logs".into(),
+            prefix: "openheimer.log".into(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(default)]
 pub struct Database {
     provider: String,
@@ -11,16 +34,10 @@ pub struct Database {
 impl Default for Database {
     fn default() -> Self {
         Self {
-            provider: "sqlite3".to_string(),
-            location: "openheimer.db".to_string(),
+            provider: "sqlite3".into(),
+            location: "openheimer.db".into(),
         }
     }
-}
-
-#[derive(Debug, Default, Deserialize, Serialize)]
-#[serde(default)]
-pub struct Configuration {
-    database: Database,
 }
 
 impl FromStr for Configuration {
