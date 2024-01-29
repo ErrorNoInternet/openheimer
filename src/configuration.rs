@@ -2,6 +2,11 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use tracing_appender::rolling;
 
+#[derive(Debug)]
+pub enum Error {
+    Deserialize(toml::de::Error),
+}
+
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[serde(default)]
 pub struct Configuration {
@@ -68,12 +73,12 @@ impl Default for Database {
 }
 
 impl FromStr for Configuration {
-    type Err = String;
+    type Err = Error;
 
     fn from_str(string: &str) -> Result<Self, Self::Err> {
         match toml::from_str(string) {
             Ok(configuration) => Ok(configuration),
-            Err(error) => Err(format!("deserialization error: {error:?}")),
+            Err(error) => Err(Error::Deserialize(error)),
         }
     }
 }

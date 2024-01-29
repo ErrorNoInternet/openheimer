@@ -19,7 +19,7 @@ fn fill(arguments: &Arguments) {
         let file_contents = match std::fs::read_to_string(configuration_file) {
             Ok(file_contents) => file_contents,
             Err(error) => {
-                eprintln!("unable to read configuration file: {error}");
+                eprintln!("unable to read configuration file: {error:#?}");
                 default.to_string()
             }
         };
@@ -27,7 +27,7 @@ fn fill(arguments: &Arguments) {
         match Configuration::from_str(file_contents.as_str()) {
             Ok(options) => options,
             Err(error) => {
-                eprintln!("unable to parse configuration file: {error}");
+                eprintln!("unable to parse configuration file: {error:#?}");
                 default
             }
         }

@@ -17,7 +17,7 @@ pub fn main(arguments: &Arguments) {
     {
         Ok(file_appender) => set_up_logging(file_appender),
         Err(error) => {
-            eprintln!("unable to set up rolling logger: {error}");
+            eprintln!("unable to set up rolling logger: {error:#?}");
         }
     };
 
@@ -34,7 +34,7 @@ fn get_options(arguments: &Arguments) -> (bool, Configuration) {
         let file_contents = match std::fs::read_to_string(configuration_file) {
             Ok(file_contents) => file_contents,
             Err(error) => {
-                eprintln!("unable to read configuration file: {error}\n");
+                eprintln!("unable to read configuration file: {error:#?}\n");
                 exit(1);
             }
         };
@@ -43,7 +43,7 @@ fn get_options(arguments: &Arguments) -> (bool, Configuration) {
         match Configuration::from_str(file_contents.as_str()) {
             Ok(options) => (false, options),
             Err(error) => {
-                eprintln!("unable to read configuration file: {error}\n");
+                eprintln!("unable to read configuration file: {error:#?}\n");
                 exit(1);
             }
         }
@@ -66,7 +66,7 @@ fn set_up_logging(file_appender: RollingFileAppender) {
         .with(console_layer);
     match tracing::subscriber::set_global_default(subscriber) {
         Ok(()) => (),
-        Err(error) => eprintln!("unable to set up logging: {error}"),
+        Err(error) => eprintln!("unable to set up logging: {error:#?}"),
     };
 }
 
