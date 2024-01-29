@@ -22,6 +22,7 @@
       }: let
         inherit (pkgs) pkgsStatic;
         inherit (pkgs) pkgsCross;
+
         rust = pkgs.rust-bin.nightly.latest.default.override {
           targets = [
             "x86_64-unknown-linux-gnu"
@@ -42,6 +43,7 @@
 
         devShells.default = pkgs.mkShell {
           name = "openheimer";
+
           buildInputs = with pkgs; [
             clang
             libgit2
