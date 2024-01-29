@@ -31,23 +31,18 @@ impl Default for Logger {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub enum LoggerRotation {
     Never,
     Minutely,
     Hourly,
+    #[default]
     Daily,
 }
 
-impl Default for LoggerRotation {
-    fn default() -> Self {
-        LoggerRotation::Daily
-    }
-}
-
-impl Into<tracing_appender::rolling::Rotation> for LoggerRotation {
-    fn into(self) -> rolling::Rotation {
-        match self {
+impl From<LoggerRotation> for tracing_appender::rolling::Rotation {
+    fn from(value: LoggerRotation) -> Self {
+        match value {
             LoggerRotation::Never => rolling::Rotation::NEVER,
             LoggerRotation::Minutely => rolling::Rotation::MINUTELY,
             LoggerRotation::Hourly => rolling::Rotation::HOURLY,
