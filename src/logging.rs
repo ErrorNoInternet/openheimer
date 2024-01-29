@@ -2,7 +2,7 @@ use crate::configuration;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::prelude::*;
 
-pub fn set_up_logging(verbosity: LevelFilter, logger_options: configuration::Logger) {
+pub fn init(verbosity: LevelFilter, logger_options: configuration::Logger) {
     let console_layer = tracing_subscriber::fmt::layer()
         .with_file(true)
         .with_line_number(true)
@@ -48,13 +48,13 @@ pub fn set_up_logging(verbosity: LevelFilter, logger_options: configuration::Log
 
 #[cfg(test)]
 mod test {
-    use super::set_up_logging;
+    use super::init;
     use crate::configuration::Configuration;
     use tracing::{debug, error, info, level_filters::LevelFilter, trace, warn};
 
     #[test]
     fn log_messages() {
-        set_up_logging(LevelFilter::TRACE, Configuration::default().logger);
+        init(LevelFilter::TRACE, Configuration::default().logger);
 
         error!("h");
         warn!("e");

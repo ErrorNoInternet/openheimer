@@ -7,7 +7,7 @@ pub fn main(arguments: &Arguments) {
     let (is_default, options) = get_options(arguments);
 
     trace!("setting up logger...");
-    logging::set_up_logging(arguments.verbosity, options.logger.clone());
+    logging::init(arguments.verbosity, options.logger.clone());
 
     info!("openheimer {}", metadata::format());
     if is_default {
