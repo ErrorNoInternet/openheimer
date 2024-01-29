@@ -3,7 +3,7 @@ use std::{process::exit, str::FromStr};
 use tracing::{debug, info, trace, warn};
 use tracing_subscriber::prelude::*;
 
-pub fn main(arguments: &Arguments) -> bool {
+pub fn main(arguments: &Arguments) {
     let (is_default, options) = get_options(arguments);
 
     set_up_logging(options.clone());
@@ -13,8 +13,6 @@ pub fn main(arguments: &Arguments) -> bool {
         warn!("falling back to default configuration!");
     }
     debug!("using configuration: {options:#?}");
-
-    true
 }
 
 fn get_options(arguments: &Arguments) -> (bool, Configuration) {

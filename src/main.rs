@@ -15,7 +15,7 @@ fn main() {
         match subcommand {
             MainSubcommand::Start => core::main(&arguments),
             MainSubcommand::Configuration { subcommand } => {
-                arguments::configuration::parse(&arguments, subcommand)
+                arguments::configuration::parse(&arguments, subcommand);
             }
         };
     }

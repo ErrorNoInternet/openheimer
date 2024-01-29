@@ -2,19 +2,18 @@ use super::{Arguments, ConfigurationSubcommand};
 use crate::configuration::Configuration;
 use std::str::FromStr;
 
-pub fn parse(arguments: &Arguments, subcommand: &ConfigurationSubcommand) -> bool {
+pub fn parse(arguments: &Arguments, subcommand: &ConfigurationSubcommand) {
     match subcommand {
         ConfigurationSubcommand::Default => default(),
         ConfigurationSubcommand::Fill => fill(arguments),
     }
 }
 
-fn default() -> bool {
+fn default() {
     println!("{}", Configuration::default().to_string());
-    true
 }
 
-fn fill(arguments: &Arguments) -> bool {
+fn fill(arguments: &Arguments) {
     let default = Configuration::default();
     let options = if let Some(configuration_file) = &arguments.configuration_file {
         let file_contents = match std::fs::read_to_string(configuration_file) {
@@ -37,5 +36,4 @@ fn fill(arguments: &Arguments) -> bool {
     };
 
     println!("{}", options.to_string());
-    true
 }
