@@ -34,7 +34,7 @@ pub struct Database {
 impl Default for Database {
     fn default() -> Self {
         Self {
-            provider: "sqlite3".into(),
+            provider: "sqlite".into(),
             location: "openheimer.db".into(),
         }
     }
