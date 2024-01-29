@@ -1,15 +1,15 @@
-mod arguments;
-mod configuration;
-mod core;
-mod database;
-mod metadata;
-mod minecraft;
+pub mod arguments;
+pub mod configuration;
+pub mod core;
+pub mod database;
+pub mod metadata;
+pub mod minecraft;
 
 use crate::arguments::MainSubcommand;
 use arguments::Arguments;
 use clap::Parser;
 
-fn main() {
+pub fn main() {
     let arguments = Arguments::parse();
     if let Some(ref subcommand) = arguments.subcommand {
         match subcommand {
