@@ -56,7 +56,7 @@
 
       packages.openheimer = pkgs.rustPlatform.buildRustPackage {
         pname = "openheimer";
-        version = "2.0.0-alpha";
+        version = "dev";
 
         cargoLock.lockFile = ./Cargo.lock;
         src = pkgs.lib.cleanSource ./.;
