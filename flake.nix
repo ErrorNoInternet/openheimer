@@ -14,6 +14,11 @@
     ...
   } @ inputs:
     flake-parts.lib.mkFlake {inherit inputs;} {
+      flake.nixConfig = {
+        extra-substituters = ["https://errornobinaries.cachix.org/"];
+        extra-trusted-public-keys = ["errornobinaries.cachix.org-1:84oagGNCIsXxBTYmfTiP+lvWje7lIS294iqAtCpFsbU="];
+      };
+
       systems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
       perSystem = {
         system,
