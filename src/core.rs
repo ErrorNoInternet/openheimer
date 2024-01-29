@@ -6,7 +6,7 @@ use tracing_subscriber::prelude::*;
 pub fn main(arguments: &Arguments) -> bool {
     let (is_default, options) = get_options(arguments);
 
-    setup_logging(options.clone());
+    set_up_logging(options.clone());
 
     info!("openheimer {}", metadata::format());
     if is_default {
@@ -41,7 +41,7 @@ fn get_options(arguments: &Arguments) -> (bool, Configuration) {
     }
 }
 
-fn setup_logging(options: Configuration) {
+fn set_up_logging(options: Configuration) {
     let (file_appender, _guard) = tracing_appender::non_blocking(tracing_appender::rolling::daily(
         options.logger.directory,
         options.logger.prefix,
@@ -61,4 +61,21 @@ fn setup_logging(options: Configuration) {
         Ok(()) => (),
         Err(error) => eprintln!("unable to set up logging: {error}"),
     };
+}
+
+#[cfg(test)]
+mod test {
+    use super::set_up_logging;
+    use crate::configuration::Configuration;
+    use tracing::{debug, error, info, trace, warn};
+
+    #[test]
+    fn log_messages() {
+        set_up_logging(Configuration::default());
+        error!("h");
+        warn!("e");
+        info!("l");
+        debug!("l");
+        trace!("o");
+    }
 }
