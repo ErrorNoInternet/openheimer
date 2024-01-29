@@ -14,15 +14,28 @@ jobs:
     name: openheimer
     runs-on: ubuntu-22.04
 
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - system: x86_64-linux
+          - system: aarch64-linux
+
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
+
+      - name: Install QEMU
+        run: |
+          sudo apt update -y
+          sudo apt install -y qemu-user-static
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v9
         with:
           extra-conf: |
             log-lines = 500
+            system = ${{ matrix.system }}
 
       - name: Set up Cachix
         uses: cachix/cachix-action@v13
@@ -30,5 +43,5 @@ jobs:
           name: errornobinaries
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
 
-      - name: Build default package
+      - name: Build for ${{ matrix.system }}
         run: nix build -L
