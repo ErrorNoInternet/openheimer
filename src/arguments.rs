@@ -1,9 +1,10 @@
+use crate::metadata;
 use clap::Parser;
 use tracing::level_filters::LevelFilter;
 
 /// The final word in Minecraft server scanners
 #[derive(Debug, Parser)]
-#[command(author, version, about, long_about = None)]
+#[command(author, version = metadata::format(), about, long_about = None)]
 pub struct Arguments {
     /// How much information to log
     #[arg(short, long, default_value = "info")]

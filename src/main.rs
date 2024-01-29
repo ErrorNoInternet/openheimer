@@ -58,7 +58,7 @@ fn main() {
         Err(error) => eprintln!("unable to set up logging: {error}"),
     };
 
-    info!("openheimer v{} ({})", metadata::VERSION, metadata::GIT_HASH);
+    info!("openheimer {}", metadata::format());
     if default {
         warn!("falling back to default configuration!");
     }
