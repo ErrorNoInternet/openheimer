@@ -18,8 +18,8 @@
         inherit system;
         overlays = [rust-overlay.overlays.default];
       };
-      pkgsStatic = pkgs.pkgsStatic;
-      pkgsCross = pkgs.pkgsCross;
+      inherit (pkgs) pkgsStatic;
+      inherit (pkgs) pkgsCross;
 
       rust = pkgs.rust-bin.nightly.latest.default.override {
         targets = [
