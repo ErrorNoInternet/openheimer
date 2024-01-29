@@ -34,7 +34,7 @@
         ];
       };
     in rec {
-      devShell = pkgs.mkShell {
+      devShells.default = pkgs.mkShell {
         name = "openheimer";
         buildInputs = with pkgs; [
           clang
