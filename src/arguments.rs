@@ -13,8 +13,8 @@ pub struct Arguments {
     pub verbosity: LevelFilter,
 
     /// TOML configuration file path
-    #[arg(short, long)]
-    pub configuration_file: Option<String>,
+    #[arg(short, long, default_value = "openheimer.toml")]
+    pub configuration_file: String,
 
     #[command(subcommand)]
     pub subcommand: Option<MainSubcommand>,
@@ -38,4 +38,7 @@ pub enum ConfigurationSubcommand {
 
     /// Add missing options to your existing configuration file
     Fill,
+
+    /// Check the validity of an existing configuration file
+    Validate,
 }

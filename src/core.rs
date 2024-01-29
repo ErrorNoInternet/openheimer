@@ -1,5 +1,5 @@
 use crate::{arguments::Arguments, configuration::Configuration, metadata};
-use std::{process::exit, str::FromStr};
+use std::str::FromStr;
 use tracing::{debug, info, trace, warn};
 use tracing_appender::rolling::RollingFileAppender;
 use tracing_subscriber::prelude::*;
@@ -29,26 +29,22 @@ pub fn main(arguments: &Arguments) {
 }
 
 fn get_options(arguments: &Arguments) -> (bool, Configuration) {
-    if let Some(configuration_file) = &arguments.configuration_file {
-        trace!("reading configuration file...");
-        let file_contents = match std::fs::read_to_string(configuration_file) {
-            Ok(file_contents) => file_contents,
-            Err(error) => {
-                eprintln!("unable to read configuration file: {error:#?}\n");
-                exit(1);
-            }
-        };
-
-        trace!("parsing configuration file...");
-        match Configuration::from_str(file_contents.as_str()) {
-            Ok(options) => (false, options),
-            Err(error) => {
-                eprintln!("unable to read configuration file: {error:#?}\n");
-                exit(1);
-            }
+    trace!("reading configuration file...");
+    let file_contents = match std::fs::read_to_string(arguments.configuration_file.clone()) {
+        Ok(file_contents) => file_contents,
+        Err(error) => {
+            warn!("unable to read configuration file: {error:#?}");
+            return (true, Configuration::default());
         }
-    } else {
-        (true, Configuration::default())
+    };
+
+    trace!("parsing configuration file...");
+    match Configuration::from_str(file_contents.as_str()) {
+        Ok(options) => (false, options),
+        Err(error) => {
+            warn!("unable to parse configuration file: {error:#?}");
+            (true, Configuration::default())
+        }
     }
 }
 
