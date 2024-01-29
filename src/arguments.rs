@@ -1,5 +1,7 @@
+pub mod configuration;
+
 use crate::metadata;
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use tracing::level_filters::LevelFilter;
 
 /// The final word in Minecraft server scanners
@@ -13,4 +15,21 @@ pub struct Arguments {
     /// TOML configuration file path
     #[arg(short, long)]
     pub configuration_file: Option<String>,
+
+    #[command(subcommand)]
+    pub subcommand: Option<MainSubcommand>,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum MainSubcommand {
+    Configuration {
+        #[command(subcommand)]
+        subcommand: ConfigurationSubcommand,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ConfigurationSubcommand {
+    Default,
+    Fill,
 }

@@ -4,7 +4,7 @@ mod database;
 mod metadata;
 mod minecraft;
 
-use crate::configuration::Configuration;
+use crate::{arguments::MainSubcommand, configuration::Configuration};
 use arguments::Arguments;
 use clap::Parser;
 use std::{process::exit, str::FromStr};
@@ -13,6 +13,16 @@ use tracing_subscriber::prelude::*;
 
 fn main() {
     let arguments = Arguments::parse();
+    if let Some(ref subcommand) = arguments.subcommand {
+        let quit = match subcommand {
+            MainSubcommand::Configuration { subcommand } => {
+                arguments::configuration::parse(&arguments, subcommand)
+            }
+        };
+        if quit {
+            return;
+        }
+    }
 
     let (is_default, options) = get_options(arguments);
 
