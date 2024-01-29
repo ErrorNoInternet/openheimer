@@ -1,18 +1,25 @@
 use crate::{arguments::Arguments, configuration::Configuration, metadata};
 use std::{process::exit, str::FromStr};
 use tracing::{debug, info, trace, warn};
-use tracing_appender::non_blocking::NonBlocking;
+use tracing_appender::rolling::RollingFileAppender;
 use tracing_subscriber::prelude::*;
 
 pub fn main(arguments: &Arguments) {
     let (is_default, options) = get_options(arguments);
 
     let binding = options.clone();
-    let (file_appender, _guard) = tracing_appender::non_blocking(tracing_appender::rolling::daily(
-        binding.logger.directory,
-        binding.logger.prefix,
-    ));
-    set_up_logging(file_appender);
+    match tracing_appender::rolling::Builder::new()
+        .filename_prefix(binding.logger.prefix)
+        .filename_suffix(binding.logger.suffix)
+        .rotation(options.logger.rotation.clone().into())
+        .max_log_files(options.logger.max_log_files)
+        .build(binding.logger.directory)
+    {
+        Ok(file_appender) => set_up_logging(file_appender),
+        Err(error) => {
+            eprintln!("unable to set up rolling logger: {error}");
+        }
+    };
 
     info!("openheimer {}", metadata::format());
     if is_default {
@@ -45,7 +52,7 @@ fn get_options(arguments: &Arguments) -> (bool, Configuration) {
     }
 }
 
-fn set_up_logging(file_appender: NonBlocking) {
+fn set_up_logging(file_appender: RollingFileAppender) {
     let file_layer = tracing_subscriber::fmt::layer()
         .with_file(true)
         .with_line_number(true)
@@ -65,19 +72,23 @@ fn set_up_logging(file_appender: NonBlocking) {
 
 #[cfg(test)]
 mod test {
-    use crate::configuration::Configuration;
     use super::set_up_logging;
+    use crate::configuration::Configuration;
     use tracing::{debug, error, info, trace, warn};
 
     #[test]
     fn log_messages() {
-        let configuration = Configuration::default();
-        let (file_appender, _guard) =
-            tracing_appender::non_blocking(tracing_appender::rolling::daily(
-                configuration.logger.directory,
-                configuration.logger.prefix,
-            ));
-        set_up_logging(file_appender);
+        let options = Configuration::default();
+        set_up_logging(
+            tracing_appender::rolling::Builder::new()
+                .filename_prefix(options.logger.prefix)
+                .filename_suffix(options.logger.suffix)
+                .rotation(options.logger.rotation.clone().into())
+                .max_log_files(options.logger.max_log_files)
+                .build(options.logger.directory)
+                .expect("should have been able to create logger files"),
+        );
+
         error!("h");
         warn!("e");
         info!("l");

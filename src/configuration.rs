@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use tracing_appender::rolling;
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[serde(default)]
@@ -12,14 +13,45 @@ pub struct Configuration {
 #[serde(default)]
 pub struct Logger {
     pub directory: String,
+    pub rotation: LoggerRotation,
+    pub max_log_files: usize,
     pub prefix: String,
+    pub suffix: String,
 }
 
 impl Default for Logger {
     fn default() -> Self {
         Self {
             directory: "openheimer/logs".into(),
-            prefix: "openheimer.log".into(),
+            rotation: LoggerRotation::default(),
+            max_log_files: 100,
+            prefix: "openheimer".into(),
+            suffix: "log".into(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum LoggerRotation {
+    Never,
+    Minutely,
+    Hourly,
+    Daily,
+}
+
+impl Default for LoggerRotation {
+    fn default() -> Self {
+        LoggerRotation::Daily
+    }
+}
+
+impl Into<tracing_appender::rolling::Rotation> for LoggerRotation {
+    fn into(self) -> rolling::Rotation {
+        match self {
+            LoggerRotation::Never => rolling::Rotation::NEVER,
+            LoggerRotation::Minutely => rolling::Rotation::MINUTELY,
+            LoggerRotation::Hourly => rolling::Rotation::HOURLY,
+            LoggerRotation::Daily => rolling::Rotation::DAILY,
         }
     }
 }
