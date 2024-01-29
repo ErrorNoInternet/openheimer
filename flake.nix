@@ -19,7 +19,10 @@
         extra-trusted-public-keys = ["errornobinaries.cachix.org-1:84oagGNCIsXxBTYmfTiP+lvWje7lIS294iqAtCpFsbU="];
       };
 
-      systems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
+      systems = [
+        "aarch64-linux"
+        "x86_64-linux"
+      ];
       perSystem = {
         system,
         pkgs,
