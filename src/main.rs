@@ -2,6 +2,7 @@ mod arguments;
 mod configuration;
 mod core;
 mod database;
+mod logging;
 mod metadata;
 mod minecraft;
 
