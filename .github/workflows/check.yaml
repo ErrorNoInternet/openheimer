@@ -1,9 +1,11 @@
-name: Rust
+name: Check
 on:
   push:
     paths:
+      - '**.nix'
       - '**.rs'
       - Cargo.*
+      - flake.lock
   pull_request:
   workflow_dispatch:
 
@@ -13,7 +15,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout repository
+      - name: Clone repository
         uses: actions/checkout@v3
 
       - name: Install Nix
@@ -38,3 +40,29 @@ jobs:
 
       - name: Run cargo test
         run: nix develop -c cargo test
+
+  nix-flake:
+    name: Nix flake
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v9
+        with:
+          extra-conf: |
+            log-lines = 500
+
+      - name: Set up Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v2
+
+      - name: Check Nix flake inputs
+        uses: DeterminateSystems/flake-checker-action@v5
+        with:
+          fail-mode: true
+          check-outdated: false
+
+      - name: Check Nix flake outputs
+        run: nix flake check -v --all-systems
