@@ -80,6 +80,6 @@ impl FromStr for Configuration {
 
 impl ToString for Configuration {
     fn to_string(&self) -> String {
-        toml::to_string_pretty(&self).unwrap()
+        toml::to_string_pretty(&self).unwrap().trim().to_string()
     }
 }
