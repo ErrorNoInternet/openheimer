@@ -36,7 +36,7 @@
           ];
         };
       in rec {
-        _module.args.pkgs = import inputs.nixpkgs {
+        _module.args.pkgs = import nixpkgs {
           inherit system;
           overlays = [rust-overlay.overlays.default];
         };
