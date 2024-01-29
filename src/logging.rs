@@ -1,21 +1,48 @@
-use tracing_appender::rolling::RollingFileAppender;
+use crate::configuration;
+use tracing::level_filters::LevelFilter;
 use tracing_subscriber::prelude::*;
 
-pub fn set_up_logging(file_appender: RollingFileAppender) {
-    let file_layer = tracing_subscriber::fmt::layer()
-        .with_file(true)
-        .with_line_number(true)
-        .with_writer(file_appender);
+pub fn set_up_logging(verbosity: LevelFilter, logger_options: configuration::Logger) {
     let console_layer = tracing_subscriber::fmt::layer()
         .with_file(true)
-        .with_line_number(true);
+        .with_line_number(true)
+        .with_writer(std::io::stdout);
 
-    let subscriber = tracing_subscriber::Registry::default()
-        .with(file_layer)
-        .with(console_layer);
-    match tracing::subscriber::set_global_default(subscriber) {
-        Ok(()) => (),
-        Err(error) => eprintln!("unable to set up logging: {error:#?}"),
+    match tracing_appender::rolling::Builder::new()
+        .filename_prefix(logger_options.prefix)
+        .filename_suffix(logger_options.suffix)
+        .rotation(logger_options.rotation.clone().into())
+        .max_log_files(logger_options.max_log_files)
+        .build(logger_options.directory)
+    {
+        Ok(file_writer) => {
+            let file_layer = tracing_subscriber::fmt::layer()
+                .with_file(true)
+                .with_line_number(true)
+                .with_writer(file_writer);
+
+            match tracing::subscriber::set_global_default(
+                tracing_subscriber::Registry::default()
+                    .with(verbosity)
+                    .with(console_layer)
+                    .with(file_layer),
+            ) {
+                Ok(()) => (),
+                Err(error) => eprintln!("unable to set up logging: {error:#?}"),
+            };
+        }
+        Err(error) => {
+            eprintln!("unable to set up rolling file logger: {error:#?}");
+
+            match tracing::subscriber::set_global_default(
+                tracing_subscriber::Registry::default()
+                    .with(verbosity)
+                    .with(console_layer),
+            ) {
+                Ok(()) => (),
+                Err(error) => eprintln!("unable to set up logging: {error:#?}"),
+            };
+        }
     };
 }
 
@@ -23,20 +50,11 @@ pub fn set_up_logging(file_appender: RollingFileAppender) {
 mod test {
     use super::set_up_logging;
     use crate::configuration::Configuration;
-    use tracing::{debug, error, info, trace, warn};
+    use tracing::{debug, error, info, level_filters::LevelFilter, trace, warn};
 
     #[test]
     fn log_messages() {
-        let options = Configuration::default();
-        set_up_logging(
-            tracing_appender::rolling::Builder::new()
-                .filename_prefix(options.logger.prefix)
-                .filename_suffix(options.logger.suffix)
-                .rotation(options.logger.rotation.clone().into())
-                .max_log_files(options.logger.max_log_files)
-                .build(options.logger.directory)
-                .expect("should have been able to create logger files"),
-        );
+        set_up_logging(LevelFilter::TRACE, Configuration::default().logger);
 
         error!("h");
         warn!("e");

@@ -3,21 +3,11 @@ use std::str::FromStr;
 use tracing::{debug, info, trace, warn};
 
 pub fn main(arguments: &Arguments) {
+    trace!("getting configuration options...");
     let (is_default, options) = get_options(arguments);
 
-    let binding = options.clone();
-    match tracing_appender::rolling::Builder::new()
-        .filename_prefix(binding.logger.prefix)
-        .filename_suffix(binding.logger.suffix)
-        .rotation(options.logger.rotation.clone().into())
-        .max_log_files(options.logger.max_log_files)
-        .build(binding.logger.directory)
-    {
-        Ok(file_appender) => logging::set_up_logging(file_appender),
-        Err(error) => {
-            eprintln!("unable to set up rolling logger: {error:#?}");
-        }
-    };
+    trace!("setting up logger...");
+    logging::set_up_logging(arguments.verbosity, options.logger.clone());
 
     info!("openheimer {}", metadata::format());
     if is_default {
