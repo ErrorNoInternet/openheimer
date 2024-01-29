@@ -15,72 +15,83 @@ impl super::Database for Database {
             .await
         {
             Ok(pool) => pool,
-            Err(error) => return Err(Error::PoolCreate(error)),
+            Err(error) => return Err(Error::Create(error)),
         };
         Ok(Database { pool })
     }
 
     async fn add_server(&mut self, server: &Server) -> Result<(), Error> {
-        let serialized_server = serde_json::to_string(server).unwrap();
         let mut connection = match self.pool.acquire().await {
             Ok(connection) => connection,
-            Err(error) => return Err(Error::AcquirePool(error)),
+            Err(error) => return Err(Error::Acquire(error)),
         };
+
+        let serialized_server = serialize(server)?;
         match sqlx::query("INSERT INTO servers ( serialized_server ) VALUES ( ?1 )")
             .bind(serialized_server)
             .execute(&mut *connection)
             .await
         {
             Ok(_) => Ok(()),
-            Err(error) => Err(Error::InsertQuery(error)),
+            Err(error) => Err(Error::Insert(error)),
         }
     }
 
     async fn add_player(&mut self, player: &Player) -> Result<(), Error> {
-        let serialized_player = serde_json::to_string(player).unwrap();
         let mut connection = match self.pool.acquire().await {
             Ok(connection) => connection,
-            Err(error) => return Err(Error::AcquirePool(error)),
+            Err(error) => return Err(Error::Acquire(error)),
         };
+
+        let serialized_player = serialize(player)?;
         match sqlx::query("INSERT INTO players ( serialized_player ) VALUES ( ?1 )")
             .bind(serialized_player)
             .execute(&mut *connection)
             .await
         {
             Ok(_) => Ok(()),
-            Err(error) => Err(Error::InsertQuery(error)),
+            Err(error) => Err(Error::Insert(error)),
         }
     }
 
     async fn add_targeted_server(&mut self, server: &Server) -> Result<(), Error> {
-        let serialized_server = serde_json::to_string(server).unwrap();
         let mut connection = match self.pool.acquire().await {
             Ok(connection) => connection,
-            Err(error) => return Err(Error::AcquirePool(error)),
+            Err(error) => return Err(Error::Acquire(error)),
         };
+
+        let serialized_server = serialize(server)?;
         match sqlx::query("INSERT INTO targeted_servers ( serialized_server ) VALUES ( ?1 )")
             .bind(serialized_server)
             .execute(&mut *connection)
             .await
         {
             Ok(_) => Ok(()),
-            Err(error) => Err(Error::InsertQuery(error)),
+            Err(error) => Err(Error::Insert(error)),
         }
     }
 
     async fn add_targeted_player(&mut self, player: &Player) -> Result<(), Error> {
-        let serialized_player = serde_json::to_string(player).unwrap();
         let mut connection = match self.pool.acquire().await {
             Ok(connection) => connection,
-            Err(error) => return Err(Error::AcquirePool(error)),
+            Err(error) => return Err(Error::Acquire(error)),
         };
+
+        let serialized_player = serialize(player)?;
         match sqlx::query("INSERT INTO targeted_players ( serialized_player ) VALUES ( ?1 )")
             .bind(serialized_player)
             .execute(&mut *connection)
             .await
         {
             Ok(_) => Ok(()),
-            Err(error) => Err(Error::InsertQuery(error)),
+            Err(error) => Err(Error::Insert(error)),
         }
+    }
+}
+
+fn serialize<T: serde::ser::Serialize>(object: T) -> Result<String, super::Error> {
+    match serde_json::to_string(&object) {
+        Ok(serialized) => Ok(serialized),
+        Err(error) => Err(super::Error::Serialize(error)),
     }
 }
