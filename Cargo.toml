@@ -12,6 +12,8 @@ built = { version = "0.7", features = ["git2"] }
 [profile.release]
 codegen-units = 1
 lto = true
+panic = "abort"
+strip = "symbols"
 trim-paths = "all"
 
 [dependencies]
