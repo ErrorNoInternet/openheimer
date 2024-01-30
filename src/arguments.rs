@@ -36,7 +36,7 @@ pub enum ConfigurationSubcommand {
     /// Generate a default configuration file
     Default,
 
-    /// Add missing options to your existing configuration file
+    /// Add missing fields to your existing configuration file
     Fill,
 
     /// Check the validity of an existing configuration file
