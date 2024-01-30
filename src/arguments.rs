@@ -33,10 +33,10 @@ pub enum MainSubcommand {
 
 #[derive(Debug, Subcommand)]
 pub enum ConfigurationSubcommand {
-    /// Generate a default configuration file
+    /// Generate a new configuration file template
     Default,
 
-    /// Add missing fields to your existing configuration file
+    /// Add missing fields to an existing configuration file
     Fill,
 
     /// Check the validity of an existing configuration file
