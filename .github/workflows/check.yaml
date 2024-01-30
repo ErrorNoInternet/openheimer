@@ -39,7 +39,7 @@ jobs:
           key: build-${{ runner.os }}-${{ hashFiles('Cargo.toml') }}-${{ hashFiles('flake.nix') }}-${{ hashFiles('**.lock') }}
 
       - name: Run cargo test
-        run: nix develop -c cargo test
+        run: nix develop -c cargo t -v
 
   nix-flake:
     name: Nix flake
