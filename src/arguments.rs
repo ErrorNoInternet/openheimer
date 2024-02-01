@@ -22,9 +22,11 @@ pub struct Arguments {
 
 #[derive(Debug, Subcommand)]
 pub enum MainSubcommand {
+    #[command(visible_aliases = ["s"])]
     Start,
 
     /// Manipulate openheimer configuration files
+    #[command(visible_aliases = ["c", "config"])]
     Configuration {
         #[command(subcommand)]
         subcommand: ConfigurationSubcommand,
@@ -34,11 +36,14 @@ pub enum MainSubcommand {
 #[derive(Debug, Subcommand)]
 pub enum ConfigurationSubcommand {
     /// Generate a new configuration file template
+    #[command(visible_aliases = ["d", "def", "new"])]
     Default,
 
     /// Add missing fields to an existing configuration file
+    #[command(visible_aliases = ["f", "merge"])]
     Fill,
 
     /// Check the validity of an existing configuration file
+    #[command(visible_aliases = ["v", "val", "check"])]
     Validate,
 }
