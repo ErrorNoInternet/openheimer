@@ -13,8 +13,8 @@ built = { version = "0.7", features = ["git2"] }
 codegen-units = 1
 lto = true
 panic = "abort"
-strip = "symbols"
-trim-paths = "all"
+strip = true
+trim-paths = true
 
 [dependencies]
 async-trait = "0.1"
