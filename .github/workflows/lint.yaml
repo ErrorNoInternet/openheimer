@@ -5,12 +5,13 @@ on:
       - '**.nix'
       - '**.rs'
       - Cargo.*
+      - flake.lock
   pull_request:
   workflow_dispatch:
 
 jobs:
-  rust-code:
-    name: Rust code
+  cargo-toml:
+    name: Cargo.toml
     runs-on: ubuntu-22.04
 
     steps:
@@ -24,7 +25,31 @@ jobs:
             log-lines = 500
 
       - name: Set up Magic Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v2
+        uses: DeterminateSystems/magic-nix-cache-action@v3
+
+      - name: Run taplo lint
+        run: nix develop -c taplo lint Cargo.toml
+
+      - name: Run taplo fmt
+        if: always()
+        run: nix develop -c taplo fmt --check Cargo.toml
+
+  rust:
+    name: Rust
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v9
+        with:
+          extra-conf: |
+            log-lines = 500
+
+      - name: Set up Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v3
 
       - name: Set up build cache
         uses: actions/cache@v4
@@ -37,15 +62,15 @@ jobs:
             target/
           key: build-${{ runner.os }}-${{ hashFiles('Cargo.toml') }}-${{ hashFiles('flake.nix') }}-${{ hashFiles('**.lock') }}
 
-      - name: Run cargo clippy
+      - name: cargo clippy
         run: nix develop -c cargo clippy -- -Dwarnings -Wclippy::pedantic
 
-      - name: Run cargo fmt
+      - name: cargo fmt
         if: always()
         run: nix develop -c cargo fmt --check
 
-  nix-flake:
-    name: Nix flake
+  nix:
+    name: Nix
     runs-on: ubuntu-22.04
 
     steps:
@@ -59,7 +84,7 @@ jobs:
             log-lines = 500
 
       - name: Set up Magic Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v2
+        uses: DeterminateSystems/magic-nix-cache-action@v3
 
       - name: Check formatting
         run: nix run nixpkgs#alejandra -- -c .

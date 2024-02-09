@@ -58,6 +58,7 @@
             mold
             pkgsCross.mingwW64.buildPackages.gcc
             rust
+            taplo
             unzip
           ];
 
