@@ -11,7 +11,7 @@ pub fn parse(arguments: &Arguments, subcommand: &ConfigurationSubcommand) {
 }
 
 fn default() {
-    println!("{}", Configuration::default().to_string());
+    println!("{}", Configuration::default());
 }
 
 fn fill(arguments: &Arguments) {
@@ -33,7 +33,7 @@ fn fill(arguments: &Arguments) {
         }
     };
 
-    println!("{}", options.to_string());
+    println!("{options}");
 }
 
 fn validate(arguments: &Arguments) {

@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
+use std::{fmt, str::FromStr};
 use tracing_appender::rolling;
 
 #[derive(Debug)]
@@ -83,8 +83,12 @@ impl FromStr for Configuration {
     }
 }
 
-impl ToString for Configuration {
-    fn to_string(&self) -> String {
-        toml::to_string_pretty(&self).unwrap().trim().to_string()
+impl fmt::Display for Configuration {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            formatter,
+            "{}",
+            toml::to_string_pretty(&self).unwrap().trim()
+        )
     }
 }
