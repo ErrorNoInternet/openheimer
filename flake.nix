@@ -8,9 +8,10 @@
   };
 
   outputs = {
-    nixpkgs,
     flake-parts,
+    nixpkgs,
     rust-overlay,
+    self,
     ...
   } @ inputs:
     flake-parts.lib.mkFlake {inherit inputs;} {
@@ -69,7 +70,10 @@
 
         packages.openheimer = pkgs.rustPlatform.buildRustPackage {
           pname = "openheimer";
-          version = "dev";
+          version =
+            if (self ? shortRev)
+            then self.shortRev
+            else self.dirtyShortRev;
 
           cargoLock.lockFile = ./Cargo.lock;
           src = pkgs.lib.cleanSource ./.;
