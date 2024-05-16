@@ -7,6 +7,26 @@ OpenHeimer is the (unofficial) open source version of the Copenheimer project. I
 
 :rocket: Capable of scanning up to <b>16,000 IP addresses per second</b>, finishing everything in just 3 days! :rocket:
 
+## Installation
+
+In order to use the current version of openheimer, you must compile from source.
+
+### Requirements
+- git (or download the tarball/zip)
+- [go](https://go.dev/dl/)
+
+In your terminal,
+
+```shell
+$ # Not necessary with tarball/zip
+$ git clone https://github.com/ErrorNoInternet/openheimer.git
+
+$ cd openheimer
+$ go build
+```
+
+You should now have an executable in the same directory.
+
 ## Usage
 Run `openheimer -help` to see a list of commands
 ```
