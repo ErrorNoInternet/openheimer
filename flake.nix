@@ -19,26 +19,20 @@
         "aarch64-linux"
         "x86_64-linux"
       ];
+
       perSystem = {
         system,
         pkgs,
         ...
       }: let
-        inherit (pkgs) pkgsStatic;
-        inherit (pkgs) pkgsCross;
-
+        inherit (pkgs) pkgsCross pkgsStatic;
         rust = pkgs.rust-bin.nightly.latest.default.override {
-          targets = [
-            "x86_64-pc-windows-gnu"
-            "x86_64-unknown-linux-gnu"
-            "x86_64-unknown-linux-musl"
-          ];
           extensions = [
             "rust-src"
             "rust-analyzer-preview"
           ];
         };
-      in rec {
+      in {
         _module.args.pkgs = import nixpkgs {
           inherit system;
           overlays = [rust-overlay.overlays.default];
@@ -68,24 +62,23 @@
           RUST_BACKTRACE = 1;
         };
 
-        packages.openheimer = pkgs.rustPlatform.buildRustPackage {
-          pname = "openheimer";
-          version =
-            if (self ? shortRev)
-            then self.shortRev
-            else self.dirtyShortRev;
+        packages = rec {
+          openheimer = pkgs.rustPlatform.buildRustPackage {
+            pname = "openheimer";
+            version = self.shortRev or self.dirtyShortRev;
 
-          cargoLock.lockFile = ./Cargo.lock;
-          src = pkgs.lib.cleanSource ./.;
+            src = pkgs.lib.cleanSource ./.;
+            cargoLock.lockFile = ./Cargo.lock;
 
-          nativeBuildInputs = with pkgs; [
-            clang
-            libgit2
-            mold
-            rust
-          ];
+            nativeBuildInputs = with pkgs; [
+              clang
+              libgit2
+              mold
+              rust
+            ];
+          };
+          default = openheimer;
         };
-        packages.default = packages.openheimer;
       };
     };
 
